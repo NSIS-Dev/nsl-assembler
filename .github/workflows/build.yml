@@ -1,0 +1,31 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    name: Build with Ant
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Setup Ant
+      run: sudo apt-get update && sudo apt-get install -y ant ant-optional
+
+    - name: Build with Ant
+      run: ant jar
+
+    - name: Test with Ant
+      run: ant test
