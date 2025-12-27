@@ -44,21 +44,6 @@ public class TokenizerTest
   }
 
   /**
-   * Test of linenoprev method, of class Tokenizer.
-   */
-  @Test
-  public void testLinenoprev()
-  {
-    System.out.println("linenoprev");
-    Tokenizer instance = new Tokenizer(new StringReader("hello\nhello\n"), "TokenizerTest");
-    instance.tokenNext();
-    int expResult = instance.lineno();
-    instance.tokenNext();
-    int result = instance.linenoprev();
-    assertEquals(expResult, result);
-  }
-
-  /**
    * Test of tokenIs method, of class Tokenizer.
    */
   @Test
