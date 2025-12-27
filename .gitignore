@@ -1,2 +1,7 @@
-**/*.jar
+# Build artifacts
 dist/
+build/
+.gradle/
+
+# Gradle wrapper jar should be committed
+!gradle/wrapper/gradle-wrapper.jar
