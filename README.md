@@ -1,5 +1,5 @@
 [![GNU General Public License](https://img.shields.io/badge/license-GPL%20v2-blue.svg?style=flat-square)](http://www.gnu.org/licenses/gpl-2.0.html)
-[![Travis CI](https://img.shields.io/travis/NSIS-Dev/nsl-assembler.svg?style=flat-square)](https://travis-ci.org/NSIS-Dev/nsl-assembler)
+[![Build and Test](https://github.com/NSIS-Dev/nsl-assembler/workflows/Build%20and%20Test/badge.svg)](https://github.com/NSIS-Dev/nsl-assembler/actions)
 
 # nsL Assembler
 
