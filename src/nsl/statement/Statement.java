@@ -366,6 +366,8 @@ public abstract class Statement
       return new StrLenInstruction(returns);
     if (ScriptParser.tokenizer.match(SubCaptionInstruction.name))
       return new SubCaptionInstruction(returns);
+    if (ScriptParser.tokenizer.match(UnicodeInstruction.name))
+      return new UnicodeInstruction(returns);
     if (ScriptParser.tokenizer.match(UninstallButtonTextInstruction.name))
       return new UninstallIconInstruction(returns);
     if (ScriptParser.tokenizer.match(UninstallCaptionInstruction.name))
@@ -440,7 +442,7 @@ public abstract class Statement
   private static Statement matchInternal()
   {
     if (ScriptParser.tokenizer.tokenIsWord())
-    {      
+    {
       // Exit if we're in an #if pre-processor directive and tokenizer hits
       // #else, #elseif or #endif.
       if (IfDirective.in())
@@ -572,7 +574,7 @@ public abstract class Statement
       // EOF found.
       if (ScriptParser.tokenizer.ttype == Tokenizer.TT_EOF)
         return null;
-      
+
       // Function call with multiple return values.
       if (ScriptParser.tokenizer.tokenIs('('))
         return new FunctionCallStatement();
@@ -580,7 +582,7 @@ public abstract class Statement
       // New block of code.
       if (ScriptParser.tokenizer.tokenIs('{'))
         return new BlockStatement();
-      
+
       // Skip ;
       if (ScriptParser.tokenizer.match(';'))
         return match();
