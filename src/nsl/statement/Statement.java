@@ -88,6 +88,8 @@ public abstract class Statement
       return new BringToFrontInstruction(returns);
     if (ScriptParser.tokenizer.match(CaptionInstruction.name))
       return new CaptionInstruction(returns);
+    if (ScriptParser.tokenizer.match(CallInstDLLInstruction.name))
+      return new CallInstDLLInstruction(returns);
     if (ScriptParser.tokenizer.match(CheckBitmapInstruction.name))
       return new CheckBitmapInstruction(returns);
     if (ScriptParser.tokenizer.match(ClearErrorsInstruction.name))
