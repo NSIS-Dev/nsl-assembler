@@ -136,6 +136,8 @@ public abstract class Statement
       return new ExecInstruction(returns);
     if (ScriptParser.tokenizer.match(ExecShellInstruction.name))
       return new ExecShellInstruction(returns);
+    if (ScriptParser.tokenizer.match(ExecShellWaitInstruction.name))
+      return new ExecShellWaitInstruction(returns);
     if (ScriptParser.tokenizer.match(ExecWaitInstruction.name))
       return new ExecWaitInstruction(returns);
     if (ScriptParser.tokenizer.match(ExpandEnvStringsInstruction.name))
