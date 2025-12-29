@@ -328,6 +328,8 @@ public abstract class Statement
       return new SetBrandingImageInstruction(returns);
     if (ScriptParser.tokenizer.match(SetCompressInstruction.name))
       return new SetCompressInstruction(returns);
+    if (ScriptParser.tokenizer.match(SetCompressionLevelInstruction.name))
+      return new SetCompressionLevelInstruction(returns);
     if (ScriptParser.tokenizer.match(SetCompressorDictSizeInstruction.name))
       return new SetCompressorDictSizeInstruction(returns);
     if (ScriptParser.tokenizer.match(SetCompressorInstruction.name))
