@@ -264,10 +264,6 @@ public abstract class Statement
       return new LicenseLangStringInstruction(returns);
     if (ScriptParser.tokenizer.match(LicenseTextInstruction.name))
       return new LicenseTextInstruction(returns);
-    if (ScriptParser.tokenizer.match(MessageBoxInstruction.name))
-      return new MessageBoxInstruction(returns);
-    if (ScriptParser.tokenizer.match(MiscButtonTextInstruction.name))
-      return new MiscButtonTextInstruction(returns);
     if (ScriptParser.tokenizer.match(ManifestAppendCustomStringInstruction.name))
       return new ManifestAppendCustomStringInstruction(returns);
     if (ScriptParser.tokenizer.match(ManifestDPIAwareInstruction.name))
@@ -280,6 +276,10 @@ public abstract class Statement
       return new ManifestLongPathAwareInstruction(returns);
     if (ScriptParser.tokenizer.match(ManifestSupportedOSInstruction.name))
       return new ManifestSupportedOSInstruction(returns);
+    if (ScriptParser.tokenizer.match(MessageBoxInstruction.name))
+      return new MessageBoxInstruction(returns);
+    if (ScriptParser.tokenizer.match(MiscButtonTextInstruction.name))
+      return new MiscButtonTextInstruction(returns);
     if (ScriptParser.tokenizer.match(NameInstruction.name))
       return new NameInstruction(returns);
     if (ScriptParser.tokenizer.match(PopInstruction.name))
