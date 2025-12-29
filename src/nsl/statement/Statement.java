@@ -188,6 +188,8 @@ public abstract class Statement
       return new GetFileTimeLocalInstruction(returns);
     if (ScriptParser.tokenizer.match(GetInstDirErrorInstruction.name))
       return new GetInstDirErrorInstruction(returns);
+    if (ScriptParser.tokenizer.match(GetShellVarContextInstruction.name))
+      return new GetShellVarContextInstruction(returns);
     if (ScriptParser.tokenizer.match(GetTempFileNameInstruction.name))
       return new GetTempFileNameInstruction(returns);
     if (ScriptParser.tokenizer.match(HideWindowInstruction.name))
