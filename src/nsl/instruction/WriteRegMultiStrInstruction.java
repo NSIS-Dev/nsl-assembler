@@ -55,6 +55,7 @@ public class WriteRegMultiStrInstruction extends AssembleExpression
     Expression varOrSubKey = AssembleExpression.getRegisterOrExpression(this.subKey);
     Expression varOrValueName = AssembleExpression.getRegisterOrExpression(this.valueName);
     Expression varOrValue = AssembleExpression.getRegisterOrExpression(this.value);
+    // The /REGEDIT5 flag is required and will always be used.
     ScriptParser.writeLine(name + " /REGEDIT5 " + this.rootKey + " " + varOrSubKey + " " + varOrValueName + " " + varOrValue);
     varOrSubKey.setInUse(false);
     varOrValueName.setInUse(false);
