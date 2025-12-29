@@ -196,6 +196,8 @@ public abstract class Statement
       return new GetShellVarContextInstruction(returns);
     if (ScriptParser.tokenizer.match(GetTempFileNameInstruction.name))
       return new GetTempFileNameInstruction(returns);
+    if (ScriptParser.tokenizer.match(GetWinVerInstruction.name))
+      return new GetWinVerInstruction(returns);
     if (ScriptParser.tokenizer.match(HideWindowInstruction.name))
       return new HideWindowInstruction(returns);
     if (ScriptParser.tokenizer.match(IconInstruction.name))
