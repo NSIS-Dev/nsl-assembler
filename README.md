@@ -16,18 +16,31 @@ nsL is a new C-like programming language for writing [NSIS][nsis] installation w
 * Recursive macros; providing assemble-time loops
 * Fast assemble speed
 
+## Prerequisites
+
+This project requires [Java 8 or later][java].
+
 ## Build
 
-The only pre-requistes for building are [Java][java] and [Ant][ant].
+The project uses [Gradle][gradle] for dependency management. The Gradle wrapper is included, so no installation is required.
 
 1. Clone repository `git clone https://github.com/NSIS-Dev/nsl-assembler nsL`
 2. Change directory `cd nsL`
-3. Build JAR `ant jar`
+3. Build JAR `./gradlew build`
+
+The compiled JAR will be in `build/libs/nsL.jar`.
+
+**Common Gradle commands:**
+- `./gradlew build` - Build project and run tests
+- `./gradlew test` - Run tests only
+- `./gradlew jar` - Build JAR only
+- `./gradlew clean` - Clean build artifacts
+- `./gradlew run --args="script.nsl"` - Run the assembler
  
 ## License
 
 This work is licensed under the [The GNU General Public License, Version 2](LICENSE.md).
 
-[nsis]: https://nsis.sourceforge.net
 [java]: https://www.java.com
-[ant]: https://ant.apache.org/
+[nsis]: https://nsis.sourceforge.net
+[gradle]: https://gradle.org/
