@@ -372,6 +372,8 @@ public abstract class Statement
       return new StrLenInstruction(returns);
     if (ScriptParser.tokenizer.match(SubCaptionInstruction.name))
       return new SubCaptionInstruction(returns);
+    if (ScriptParser.tokenizer.match(TargetInstruction.name))
+      return new TargetInstruction(returns);
     if (ScriptParser.tokenizer.match(UnicodeInstruction.name))
       return new UnicodeInstruction(returns);
     if (ScriptParser.tokenizer.match(UninstallButtonTextInstruction.name))
