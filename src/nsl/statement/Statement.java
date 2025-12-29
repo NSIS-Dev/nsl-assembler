@@ -268,6 +268,8 @@ public abstract class Statement
       return new MessageBoxInstruction(returns);
     if (ScriptParser.tokenizer.match(MiscButtonTextInstruction.name))
       return new MiscButtonTextInstruction(returns);
+    if (ScriptParser.tokenizer.match(ManifestAppendCustomStringInstruction.name))
+      return new ManifestAppendCustomStringInstruction(returns);
     if (ScriptParser.tokenizer.match(ManifestDPIAwareInstruction.name))
       return new ManifestDPIAwareInstruction(returns);
     if (ScriptParser.tokenizer.match(ManifestLongPathAwareInstruction.name))
