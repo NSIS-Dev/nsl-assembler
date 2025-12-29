@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        java: [ '17', '21' ]
+        java: [ '8', '11', '17', '21' ] # all the LTS versions
       fail-fast: false
 
     steps:
