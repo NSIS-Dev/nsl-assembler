@@ -21,6 +21,11 @@ public class ManifestSupportedOSInstruction extends AssembleExpression
   public static final String name = "ManifestSupportedOS";
   private final ArrayList<Expression> values;
   private static final Set<String> VALID_OS_VALUES = new HashSet<>(Arrays.asList(
+    /**
+     * Windows 11 uses the same supportedOS GUID as Windows 10
+     *
+     * @see https://learn.microsoft.com/en-us/windows/win32/sbscs/application-manifests#supportedOS
+     */
     "WinVista", "Win7", "Win8", "Win8.1", "Win10"
   ));
 
