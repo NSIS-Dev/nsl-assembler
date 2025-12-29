@@ -190,6 +190,8 @@ public abstract class Statement
       return new GetInstDirErrorInstruction(returns);
     if (ScriptParser.tokenizer.match(GetKnownFolderPathInstruction.name))
       return new GetKnownFolderPathInstruction(returns);
+    if (ScriptParser.tokenizer.match(GetRegViewInstruction.name))
+      return new GetRegViewInstruction(returns);
     if (ScriptParser.tokenizer.match(GetShellVarContextInstruction.name))
       return new GetShellVarContextInstruction(returns);
     if (ScriptParser.tokenizer.match(GetTempFileNameInstruction.name))
