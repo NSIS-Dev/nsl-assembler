@@ -65,7 +65,7 @@ public class FileWriteUTF16LEInstruction extends AssembleExpression
     if (this.bomFlag != null)
     {
       AssembleExpression.assembleIfRequired(this.bomFlag);
-      if (this.bomFlag.getBooleanValue() == true)
+      if (this.bomFlag.getBooleanValue())
         write += " /BOM";
     }
 
