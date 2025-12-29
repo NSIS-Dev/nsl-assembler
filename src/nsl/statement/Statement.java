@@ -402,6 +402,10 @@ public abstract class Statement
       return new WriteRegDWORDInstruction(returns);
     if (ScriptParser.tokenizer.match(WriteRegExpandStrInstruction.name))
       return new WriteRegExpandStrInstruction(returns);
+    if (ScriptParser.tokenizer.match(WriteRegMultiStrInstruction.name))
+      return new WriteRegMultiStrInstruction(returns);
+    if (ScriptParser.tokenizer.match(WriteRegNoneInstruction.name))
+      return new WriteRegNoneInstruction(returns);
     if (ScriptParser.tokenizer.match(WriteRegStrInstruction.name))
       return new WriteRegStrInstruction(returns);
     if (ScriptParser.tokenizer.match(WriteUninstallerInstruction.name))
