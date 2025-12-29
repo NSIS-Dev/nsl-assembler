@@ -24,8 +24,8 @@ public class GetKnownFolderPathInstruction extends AssembleExpression
    */
   public GetKnownFolderPathInstruction(int returns)
   {
-    if (PageExInfo.in())
-      throw new NslContextException(EnumSet.of(NslContext.Section, NslContext.Function, NslContext.Global), name);
+    if (!SectionInfo.in() && !FunctionInfo.in())
+      throw new NslContextException(EnumSet.of(NslContext.Section, NslContext.Function), name);
     if (returns != 1)
       throw new NslReturnValueException(name, 1);
 
