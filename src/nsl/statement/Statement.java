@@ -156,6 +156,10 @@ public abstract class Statement
       return new FileReadByteInstruction(returns);
     if (ScriptParser.tokenizer.match(FileReadInstruction.name))
       return new FileReadInstruction(returns);
+    if (ScriptParser.tokenizer.match(FileReadUTF16LEInstruction.name))
+      return new FileReadUTF16LEInstruction(returns);
+    if (ScriptParser.tokenizer.match(FileReadWordInstruction.name))
+      return new FileReadWordInstruction(returns);
     if (ScriptParser.tokenizer.match(FileRecursiveInstruction.name))
       return new FileRecursiveInstruction(returns);
     if (ScriptParser.tokenizer.match(FileSeekInstruction.name))
