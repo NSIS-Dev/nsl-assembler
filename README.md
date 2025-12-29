@@ -16,6 +16,10 @@ nsL is a new C-like programming language for writing [NSIS][nsis] installation w
 * Recursive macros; providing assemble-time loops
 * Fast assemble speed
 
+## Prerequisites
+
+This project requires [Java 8 or later][java].
+
 ## Build
 
 The project uses [Gradle][gradle] for dependency management. The Gradle wrapper is included, so no installation is required.
@@ -37,5 +41,6 @@ The compiled JAR will be in `build/libs/nsL.jar`.
 
 This work is licensed under the [The GNU General Public License, Version 2](LICENSE.md).
 
+[java]: https://www.java.com
 [nsis]: https://nsis.sourceforge.net
 [gradle]: https://gradle.org/
