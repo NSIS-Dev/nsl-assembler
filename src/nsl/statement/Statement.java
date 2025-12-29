@@ -168,6 +168,10 @@ public abstract class Statement
       return new FileWriteByteInstruction(returns);
     if (ScriptParser.tokenizer.match(FileWriteInstruction.name))
       return new FileWriteInstruction(returns);
+    if (ScriptParser.tokenizer.match(FileWriteUTF16LEInstruction.name))
+      return new FileWriteUTF16LEInstruction(returns);
+    if (ScriptParser.tokenizer.match(FileWriteWordInstruction.name))
+      return new FileWriteWordInstruction(returns);
     if (ScriptParser.tokenizer.match(FindCloseInstruction.name))
       return new FindCloseInstruction(returns);
     if (ScriptParser.tokenizer.match(FindFirstInstruction.name))
