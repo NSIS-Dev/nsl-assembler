@@ -44,7 +44,7 @@ public class ManifestDisableWindowFilteringInstruction extends AssembleExpressio
         throw new NslArgumentException(name, 1, ExpressionType.Boolean);
 
       // This is a bit of weird one: Only allows 'true', not 'false'
-      if (this.value.getBooleanValue() == false)
+      if (!this.value.getBooleanValue())
       {
         throw new NslException(String.format(
           "%s: Only 'true' is allowed as parameter. Use no parameter for 'notset'.",
