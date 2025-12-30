@@ -42,6 +42,7 @@ public abstract class AssembleExpression extends Expression {
 	public static void assembleIfRequired(Expression expression) throws IOException {
 		if (expression instanceof AssembleExpression) ((AssembleExpression) expression).assemble();
 	}
+
 	/**
 	 * Gets the next freely available NSIS register if the given expression requires assembling or the
 	 * given expression otherwise.
