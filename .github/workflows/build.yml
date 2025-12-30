@@ -33,5 +33,10 @@ jobs:
       if: matrix.java == '17' || matrix.java == '21'
       run: ./gradlew spotlessCheck --no-daemon
 
-    - name: Build with Gradle
+    - name: Build with Gradle (Java 8)
+      if: matrix.java == '8'
+      run: ./gradlew build -x spotlessCheck -x spotlessJava --no-daemon
+
+    - name: Build with Gradle (Java 11+)
+      if: matrix.java != '8'
       run: ./gradlew build --no-daemon
