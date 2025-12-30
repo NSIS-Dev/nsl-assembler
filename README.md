@@ -3,18 +3,22 @@
 
 # nsL Assembler
 
-nsL is a new C-like programming language for writing [NSIS][nsis] installation wizards. The nsL assembler takes nsL code and translates it into original NSIS script which can then be compiled.
+nsL is a new C-like programming language for writing [NSIS][nsis] installation wizards. The nsL assembler takes nsL code and translates it into an NSIS script, which can then be compiled.
+
+> [!IMPORTANT]  
+> This repository started as a pure mirror of the SourceForge-hosted [SVN repository][sourceforge], which has not been updated since April 2011. However, starting in December 2025, several additions have
+been made that are unique to this repository and that will not be merged back.
 
 **Features:**
 
-* Complete support for complex arithmetic and Boolean expression will all operators
-* Automatically declared un-typed variables with assemble-time scope checking
+* Complete support for complex arithmetic and Boolean expressions with all operators
+* Automatically declared un-typed variables with assembly-time scope checking
 * Native high-level constructs such as if, switch, while, do, for
 * New function, section and page declaration syntax
 * Functions, instructions and macros callable using C-style syntax
 * Built-in wrapper instructions for all NSIS instructions using new syntax
 * Recursive macros; providing assemble-time loops
-* Fast assemble speed
+* Fast assembly speed
 
 ## Prerequisites
 
@@ -44,3 +48,4 @@ This work is licensed under the [The GNU General Public License, Version 2](LICE
 [java]: https://www.java.com
 [nsis]: https://nsis.sourceforge.net
 [gradle]: https://gradle.org/
+[sourceforge]: https://sourceforge.net/projects/nslassembler/
