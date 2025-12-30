@@ -5,13 +5,11 @@
 package nsl;
 
 /**
- *
  * @author Stuart
  */
-public enum NslContext
-{
-  Global,
-  Section,
-  Function,
-  PageEx
+public enum NslContext {
+	Global,
+	Section,
+	Function,
+	PageEx
 }

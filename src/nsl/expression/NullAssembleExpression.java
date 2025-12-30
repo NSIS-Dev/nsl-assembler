@@ -9,23 +9,15 @@ import nsl.Register;
 
 /**
  * An expression that when assembled, assembles nothing.
+ *
  * @author Stuart
  */
-public class NullAssembleExpression extends AssembleExpression
-{
-  /**
-   * Assembles nothing.
-   */
-  @Override
-  public void assemble() throws IOException
-  {
-  }
+public class NullAssembleExpression extends AssembleExpression {
+	/** Assembles nothing. */
+	@Override
+	public void assemble() throws IOException {}
 
-  /**
-   * Assembles nothing.
-   */
-  @Override
-  public void assemble(Register var) throws IOException
-  {
-  }
+	/** Assembles nothing. */
+	@Override
+	public void assemble(Register var) throws IOException {}
 }

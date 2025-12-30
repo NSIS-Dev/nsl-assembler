@@ -13,47 +13,41 @@ import nsl.expression.*;
 /**
  * @author Stuart
  */
-public class GetFunctionAddressInstruction extends AssembleExpression
-{
-  public static final String name = "GetFunctionAddress";
-  private final Expression functionName;
+public class GetFunctionAddressInstruction extends AssembleExpression {
+	public static final String name = "GetFunctionAddress";
+	private final Expression functionName;
 
-  /**
-   * Class constructor.
-   * @param returns the number of values to return
-   */
-  public GetFunctionAddressInstruction(int returns)
-  {
-    if (!SectionInfo.in() && !FunctionInfo.in())
-      throw new NslContextException(EnumSet.of(NslContext.Section, NslContext.Function), name);
-    if (returns != 1)
-      throw new NslReturnValueException(name, 1);
+	/**
+	 * Class constructor.
+	 *
+	 * @param returns the number of values to return
+	 */
+	public GetFunctionAddressInstruction(int returns) {
+		if (!SectionInfo.in() && !FunctionInfo.in())
+			throw new NslContextException(EnumSet.of(NslContext.Section, NslContext.Function), name);
+		if (returns != 1) throw new NslReturnValueException(name, 1);
 
-    ArrayList<Expression> paramsList = Expression.matchList();
-    if (paramsList.size() != 1)
-      throw new NslArgumentException(name, 1);
+		ArrayList<Expression> paramsList = Expression.matchList();
+		if (paramsList.size() != 1) throw new NslArgumentException(name, 1);
 
-    this.functionName = paramsList.get(0);
-  }
+		this.functionName = paramsList.get(0);
+	}
 
-  /**
-   * Assembles the source code.
-   */
-  @Override
-  public void assemble() throws IOException
-  {
-    throw new UnsupportedOperationException("Not supported.");
-  }
+	/** Assembles the source code. */
+	@Override
+	public void assemble() throws IOException {
+		throw new UnsupportedOperationException("Not supported.");
+	}
 
-  /**
-   * Assembles the source code.
-   * @param var the variable to assign the value to
-   */
-  @Override
-  public void assemble(Register var) throws IOException
-  {
-    Expression varOrFunctionName = AssembleExpression.getRegisterOrExpression(this.functionName);
-    ScriptParser.writeLine(name + " " + var + " " + varOrFunctionName);
-    varOrFunctionName.setInUse(false);
-  }
+	/**
+	 * Assembles the source code.
+	 *
+	 * @param var the variable to assign the value to
+	 */
+	@Override
+	public void assemble(Register var) throws IOException {
+		Expression varOrFunctionName = AssembleExpression.getRegisterOrExpression(this.functionName);
+		ScriptParser.writeLine(name + " " + var + " " + varOrFunctionName);
+		varOrFunctionName.setInUse(false);
+	}
 }
