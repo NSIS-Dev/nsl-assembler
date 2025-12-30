@@ -13,21 +13,29 @@ jobs:
 
     strategy:
       matrix:
-        java: [ '8', '11', '17', '21' ] # all the LTS versions
+        # all the LTS versions
+        java: [ '8', '11', '17', '21' ]
       fail-fast: false
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up JDK ${{ matrix.java }}
+    - name: Set up JDK 17 (for Gradle/Spotless)
       uses: actions/setup-java@v4
       with:
-        java-version: ${{ matrix.java }}
+        java-version: '17'
         distribution: 'temurin'
 
     - name: Setup Gradle
-      uses: gradle/gradle-build-action@v3
+      uses: gradle/actions/setup-gradle@v5
 
-    - name: Build with Gradle
-      run: ./gradlew build --no-daemon
+    - name: Check code formatting
+      # older versions are incompatible with our spotless version
+      if: matrix.java == '17' || matrix.java == '21'
+      run: ./gradlew spotlessCheck --no-daemon
+
+    - name: Build and test with JDK ${{ matrix.java }}
+      run: ./gradlew build --no-daemon -PjavaToolchain=${{ matrix.java }}
+      env:
+        GRADLE_OPTS: -Dorg.gradle.java.installations.auto-download=true

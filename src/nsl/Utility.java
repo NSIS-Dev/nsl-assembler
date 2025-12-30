@@ -6,9 +6,9 @@ package nsl;
 
 /**
  * Provides various static utility methods.
+ *
  * @author Stuart
  */
-public class Utility
-{
-  private Utility() { }
+public class Utility {
+	private Utility() {}
 }
