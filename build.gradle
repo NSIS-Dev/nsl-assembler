@@ -1,7 +1,7 @@
 plugins {
 	id 'java'
 	id 'application'
-	id 'com.diffplug.spotless' version '6.13.0'
+	id 'com.diffplug.spotless' version '6.25.0'
 }
 
 group = 'nsl'
@@ -63,8 +63,8 @@ spotless {
 	java {
 		target 'src/**/*.java', 'test/**/*.java'
 
-		// Use Google Java Format
-		googleJavaFormat()
+		// Use Google Java Format with explicit version for Java 21 compatibility
+		googleJavaFormat('1.22.0')
 
 		// Additional formatting
 		removeUnusedImports()
