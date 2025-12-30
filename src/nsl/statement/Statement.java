@@ -88,6 +88,8 @@ public abstract class Statement
       return new BringToFrontInstruction(returns);
     if (ScriptParser.tokenizer.match(CaptionInstruction.name))
       return new CaptionInstruction(returns);
+    if (ScriptParser.tokenizer.match(CallInstDLLInstruction.name))
+      return new CallInstDLLInstruction(returns);
     if (ScriptParser.tokenizer.match(CheckBitmapInstruction.name))
       return new CheckBitmapInstruction(returns);
     if (ScriptParser.tokenizer.match(ClearErrorsInstruction.name))
@@ -136,6 +138,8 @@ public abstract class Statement
       return new ExecInstruction(returns);
     if (ScriptParser.tokenizer.match(ExecShellInstruction.name))
       return new ExecShellInstruction(returns);
+    if (ScriptParser.tokenizer.match(ExecShellWaitInstruction.name))
+      return new ExecShellWaitInstruction(returns);
     if (ScriptParser.tokenizer.match(ExecWaitInstruction.name))
       return new ExecWaitInstruction(returns);
     if (ScriptParser.tokenizer.match(ExpandEnvStringsInstruction.name))
@@ -154,6 +158,10 @@ public abstract class Statement
       return new FileReadByteInstruction(returns);
     if (ScriptParser.tokenizer.match(FileReadInstruction.name))
       return new FileReadInstruction(returns);
+    if (ScriptParser.tokenizer.match(FileReadUTF16LEInstruction.name))
+      return new FileReadUTF16LEInstruction(returns);
+    if (ScriptParser.tokenizer.match(FileReadWordInstruction.name))
+      return new FileReadWordInstruction(returns);
     if (ScriptParser.tokenizer.match(FileRecursiveInstruction.name))
       return new FileRecursiveInstruction(returns);
     if (ScriptParser.tokenizer.match(FileSeekInstruction.name))
@@ -162,6 +170,10 @@ public abstract class Statement
       return new FileWriteByteInstruction(returns);
     if (ScriptParser.tokenizer.match(FileWriteInstruction.name))
       return new FileWriteInstruction(returns);
+    if (ScriptParser.tokenizer.match(FileWriteUTF16LEInstruction.name))
+      return new FileWriteUTF16LEInstruction(returns);
+    if (ScriptParser.tokenizer.match(FileWriteWordInstruction.name))
+      return new FileWriteWordInstruction(returns);
     if (ScriptParser.tokenizer.match(FindCloseInstruction.name))
       return new FindCloseInstruction(returns);
     if (ScriptParser.tokenizer.match(FindFirstInstruction.name))
@@ -188,8 +200,16 @@ public abstract class Statement
       return new GetFileTimeLocalInstruction(returns);
     if (ScriptParser.tokenizer.match(GetInstDirErrorInstruction.name))
       return new GetInstDirErrorInstruction(returns);
+    if (ScriptParser.tokenizer.match(GetKnownFolderPathInstruction.name))
+      return new GetKnownFolderPathInstruction(returns);
+    if (ScriptParser.tokenizer.match(GetRegViewInstruction.name))
+      return new GetRegViewInstruction(returns);
+    if (ScriptParser.tokenizer.match(GetShellVarContextInstruction.name))
+      return new GetShellVarContextInstruction(returns);
     if (ScriptParser.tokenizer.match(GetTempFileNameInstruction.name))
       return new GetTempFileNameInstruction(returns);
+    if (ScriptParser.tokenizer.match(GetWinVerInstruction.name))
+      return new GetWinVerInstruction(returns);
     if (ScriptParser.tokenizer.match(HideWindowInstruction.name))
       return new HideWindowInstruction(returns);
     if (ScriptParser.tokenizer.match(IconInstruction.name))
@@ -246,6 +266,18 @@ public abstract class Statement
       return new LicenseLangStringInstruction(returns);
     if (ScriptParser.tokenizer.match(LicenseTextInstruction.name))
       return new LicenseTextInstruction(returns);
+    if (ScriptParser.tokenizer.match(ManifestAppendCustomStringInstruction.name))
+      return new ManifestAppendCustomStringInstruction(returns);
+    if (ScriptParser.tokenizer.match(ManifestDPIAwareInstruction.name))
+      return new ManifestDPIAwareInstruction(returns);
+    if (ScriptParser.tokenizer.match(ManifestDisableWindowFilteringInstruction.name))
+      return new ManifestDisableWindowFilteringInstruction(returns);
+    if (ScriptParser.tokenizer.match(ManifestGdiScalingInstruction.name))
+      return new ManifestGdiScalingInstruction(returns);
+    if (ScriptParser.tokenizer.match(ManifestLongPathAwareInstruction.name))
+      return new ManifestLongPathAwareInstruction(returns);
+    if (ScriptParser.tokenizer.match(ManifestSupportedOSInstruction.name))
+      return new ManifestSupportedOSInstruction(returns);
     if (ScriptParser.tokenizer.match(MessageBoxInstruction.name))
       return new MessageBoxInstruction(returns);
     if (ScriptParser.tokenizer.match(MiscButtonTextInstruction.name))
@@ -312,6 +344,8 @@ public abstract class Statement
       return new SetBrandingImageInstruction(returns);
     if (ScriptParser.tokenizer.match(SetCompressInstruction.name))
       return new SetCompressInstruction(returns);
+    if (ScriptParser.tokenizer.match(SetCompressionLevelInstruction.name))
+      return new SetCompressionLevelInstruction(returns);
     if (ScriptParser.tokenizer.match(SetCompressorDictSizeInstruction.name))
       return new SetCompressorDictSizeInstruction(returns);
     if (ScriptParser.tokenizer.match(SetCompressorInstruction.name))
@@ -366,6 +400,10 @@ public abstract class Statement
       return new StrLenInstruction(returns);
     if (ScriptParser.tokenizer.match(SubCaptionInstruction.name))
       return new SubCaptionInstruction(returns);
+    if (ScriptParser.tokenizer.match(TargetInstruction.name))
+      return new TargetInstruction(returns);
+    if (ScriptParser.tokenizer.match(UnicodeInstruction.name))
+      return new UnicodeInstruction(returns);
     if (ScriptParser.tokenizer.match(UninstallButtonTextInstruction.name))
       return new UninstallIconInstruction(returns);
     if (ScriptParser.tokenizer.match(UninstallCaptionInstruction.name))
@@ -392,6 +430,10 @@ public abstract class Statement
       return new WriteRegDWORDInstruction(returns);
     if (ScriptParser.tokenizer.match(WriteRegExpandStrInstruction.name))
       return new WriteRegExpandStrInstruction(returns);
+    if (ScriptParser.tokenizer.match(WriteRegMultiStrInstruction.name))
+      return new WriteRegMultiStrInstruction(returns);
+    if (ScriptParser.tokenizer.match(WriteRegNoneInstruction.name))
+      return new WriteRegNoneInstruction(returns);
     if (ScriptParser.tokenizer.match(WriteRegStrInstruction.name))
       return new WriteRegStrInstruction(returns);
     if (ScriptParser.tokenizer.match(WriteUninstallerInstruction.name))
@@ -440,7 +482,7 @@ public abstract class Statement
   private static Statement matchInternal()
   {
     if (ScriptParser.tokenizer.tokenIsWord())
-    {      
+    {
       // Exit if we're in an #if pre-processor directive and tokenizer hits
       // #else, #elseif or #endif.
       if (IfDirective.in())
@@ -572,7 +614,7 @@ public abstract class Statement
       // EOF found.
       if (ScriptParser.tokenizer.ttype == Tokenizer.TT_EOF)
         return null;
-      
+
       // Function call with multiple return values.
       if (ScriptParser.tokenizer.tokenIs('('))
         return new FunctionCallStatement();
@@ -580,7 +622,7 @@ public abstract class Statement
       // New block of code.
       if (ScriptParser.tokenizer.tokenIs('{'))
         return new BlockStatement();
-      
+
       // Skip ;
       if (ScriptParser.tokenizer.match(';'))
         return match();

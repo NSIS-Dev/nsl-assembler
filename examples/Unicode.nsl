@@ -1,0 +1,7 @@
+OutFile("UnicodeTest.exe");
+ShowInstDetails("show");
+Unicode(true);
+
+section Test()
+{
+}
