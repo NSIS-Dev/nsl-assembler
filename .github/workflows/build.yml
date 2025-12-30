@@ -30,6 +30,7 @@ jobs:
       uses: gradle/gradle-build-action@v3
 
     - name: Check code formatting
+      if: matrix.java == '17' || matrix.java == '21'
       run: ./gradlew spotlessCheck --no-daemon
 
     - name: Build with Gradle
