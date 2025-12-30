@@ -8,8 +8,13 @@ group = 'nsl'
 version = '1.0-SNAPSHOT'
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_1_8
-	targetCompatibility = JavaVersion.VERSION_1_8
+	// Use toolchain to compile with specified Java version
+	// This allows Gradle to run with Java 11+ (for Spotless) while compiling for target version
+	toolchain {
+		// Default to Java 8, but can be overridden via -PjavaToolchain=X
+		def toolchainVersion = project.hasProperty('javaToolchain') ? project.property('javaToolchain') : '8'
+		languageVersion = JavaLanguageVersion.of(toolchainVersion)
+	}
 }
 
 application {
