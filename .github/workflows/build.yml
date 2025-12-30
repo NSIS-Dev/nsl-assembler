@@ -27,7 +27,7 @@ jobs:
         distribution: 'temurin'
 
     - name: Setup Gradle
-      uses: gradle/gradle-build-action@v3
+      uses: gradle/actions/setup-gradle@v5
 
     - name: Check code formatting
       if: matrix.java == '17' || matrix.java == '21'
