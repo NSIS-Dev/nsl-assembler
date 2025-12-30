@@ -13,7 +13,8 @@ jobs:
 
     strategy:
       matrix:
-        java: [ '8', '11', '17', '21' ] # all the LTS versions
+        # all the LTS versions
+        java: [ '8', '11', '17', '21' ]
       fail-fast: false
 
     steps:
@@ -30,6 +31,7 @@ jobs:
       uses: gradle/actions/setup-gradle@v5
 
     - name: Check code formatting
+      # older versions are incompatible with our spotless version
       if: matrix.java == '17' || matrix.java == '21'
       run: ./gradlew spotlessCheck --no-daemon
 
