@@ -93,6 +93,7 @@ public abstract class Statement {
 			return new ComponentTextInstruction(returns);
 		if (ScriptParser.tokenizer.match(CopyFilesInstruction.name))
 			return new CopyFilesInstruction(returns);
+		if (ScriptParser.tokenizer.match(CPUInstruction.name)) return new CPUInstruction(returns);
 		if (ScriptParser.tokenizer.match(CRCCheckInstruction.name))
 			return new CRCCheckInstruction(returns);
 		if (ScriptParser.tokenizer.match(CreateDirectoryInstruction.name))
