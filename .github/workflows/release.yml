@@ -26,7 +26,7 @@ jobs:
       uses: gradle/actions/setup-gradle@v5
 
     - name: Build JAR
-      run: ./gradlew clean jar --no-daemon
+      run: ./gradlew clean jar --no-daemon -PjavaToolchain=8
       env:
         GRADLE_OPTS: -Dorg.gradle.java.installations.auto-download=true
 
