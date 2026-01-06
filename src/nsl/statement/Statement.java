@@ -393,6 +393,8 @@ public abstract class Statement {
 			return new UninstallTextInstruction(returns);
 		if (ScriptParser.tokenizer.match(UnRegDLLInstruction.name))
 			return new UnRegDLLInstruction(returns);
+		if (ScriptParser.tokenizer.match(UnsafeStrCpyInstruction.name))
+			return new UnsafeStrCpyInstruction(returns);
 		if (ScriptParser.tokenizer.match(VIAddVersionKeyInstruction.name))
 			return new VIAddVersionKeyInstruction(returns);
 		if (ScriptParser.tokenizer.match(VIProductVersionInstruction.name))

@@ -15,6 +15,7 @@ import nsl.expression.*;
  */
 public class StrCpyInstruction extends AssembleExpression {
 	public static final String name = "StrCpy";
+	protected final String instructionName;
 	private final Expression string;
 	private final Expression maxLen;
 	private final Expression startOffset;
@@ -25,14 +26,25 @@ public class StrCpyInstruction extends AssembleExpression {
 	 * @param returns the number of values to return
 	 */
 	public StrCpyInstruction(int returns) {
+		this(returns, name);
+	}
+
+	/**
+	 * Class constructor for subclasses with different instruction names.
+	 *
+	 * @param returns the number of values to return
+	 * @param instructionName the name of the instruction (e.g., "StrCpy" or "UnsafeStrCpy")
+	 */
+	protected StrCpyInstruction(int returns, String instructionName) {
+		this.instructionName = instructionName;
 		if (PageExInfo.in())
 			throw new NslContextException(
-					EnumSet.of(NslContext.Section, NslContext.Function, NslContext.Global), name);
-		if (returns != 11) throw new NslReturnValueException(name, 1);
+					EnumSet.of(NslContext.Section, NslContext.Function, NslContext.Global), instructionName);
+		if (returns != 1) throw new NslReturnValueException(instructionName, 1);
 
 		ArrayList<Expression> paramsList = Expression.matchList();
 		int paramsCount = paramsList.size();
-		if (paramsCount < 1 || paramsCount > 3) throw new NslArgumentException(name, 1, 3);
+		if (paramsCount < 1 || paramsCount > 3) throw new NslArgumentException(instructionName, 1, 3);
 
 		this.string = paramsList.get(0);
 
@@ -73,14 +85,22 @@ public class StrCpyInstruction extends AssembleExpression {
 			if (this.startOffset != null) {
 				Expression varOrStartOffset = AssembleExpression.getRegisterOrExpression(this.startOffset);
 				ScriptParser.writeLine(
-						name + " " + var + " " + varOrString + " " + varOrMaxLen + " " + varOrStartOffset);
+						instructionName
+								+ " "
+								+ var
+								+ " "
+								+ varOrString
+								+ " "
+								+ varOrMaxLen
+								+ " "
+								+ varOrStartOffset);
 				varOrStartOffset.setInUse(false);
 			} else {
-				ScriptParser.writeLine(name + " " + var + " " + varOrString + " " + varOrMaxLen);
+				ScriptParser.writeLine(instructionName + " " + var + " " + varOrString + " " + varOrMaxLen);
 			}
 			varOrMaxLen.setInUse(false);
 		} else {
-			ScriptParser.writeLine(name + " " + var + " " + varOrString);
+			ScriptParser.writeLine(instructionName + " " + var + " " + varOrString);
 		}
 		varOrString.setInUse(false);
 	}
