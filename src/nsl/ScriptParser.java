@@ -99,8 +99,11 @@ public class ScriptParser {
 				if (writer != null) {
 					try {
 						writer.close();
-					} finally {
+					} catch (IOException closeEx) {
+						// Ignored: a failure is already being reported below and the
+						// partial output file is deleted regardless.
 					}
+					writer = null;
 					outputFile.delete();
 				}
 
