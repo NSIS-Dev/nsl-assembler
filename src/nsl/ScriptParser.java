@@ -126,13 +126,10 @@ public class ScriptParser {
 				if (!noMakeNSIS) {
 					File makensisw = new File("..\\makensisw.exe");
 					if (makensisw.exists()) {
-						Runtime.getRuntime()
-								.exec(
-										"\""
-												+ makensisw.getAbsolutePath()
-												+ "\" \""
-												+ outputFile.getCanonicalPath()
-												+ "\"");
+						// Pass the arguments individually; Runtime.exec(String) splits the
+						// command on whitespace and does not honour embedded quotes, so any
+						// path containing a space would arrive as several arguments.
+						new ProcessBuilder(makensisw.getAbsolutePath(), outputFile.getCanonicalPath()).start();
 					} else {
 						stderr.println("Unable to compile \"" + outputFile.getCanonicalPath() + "\":");
 						stderr.println(
