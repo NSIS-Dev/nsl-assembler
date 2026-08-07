@@ -8,6 +8,7 @@ import static org.junit.Assert.*;
 
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
+import nsl.NslException;
 import nsl.ScriptParser;
 import nsl.Tokenizer;
 import org.junit.After;
@@ -146,5 +147,73 @@ public class ExpressionTest {
 		System.out.println("  " + (booleanValue = Expression.matchComplex().getBooleanValue()));
 		assertEquals(true == false || false != true || true == false && false != true, booleanValue);
 		ScriptParser.tokenizer.matchEolOrDie();
+	}
+
+	/**
+	 * Assembles a single expression and returns its value as a string. Every call leaves the
+	 * tokenizer stack as it found it.
+	 */
+	private static String evaluate(String expression) {
+		ScriptParser.pushTokenizer(new Tokenizer(new StringReader(expression), "ExpressionTest"));
+		try {
+			return Expression.matchComplex().toString();
+		} finally {
+			ScriptParser.popTokenizer();
+		}
+	}
+
+	/** Test of the format() assemble time function, of class Expression. */
+	@Test
+	public void testFormat() {
+		System.out.println("format");
+
+		// A substitution that leaves the string shorter than it was.
+		assertEquals("\"1\"", evaluate("format('{0}', 1)"));
+
+		// One that leaves it longer, with and without literal text around it.
+		assertEquals("\"a-LONGVALUE-b\"", evaluate("format('a-{0}-b', 'LONGVALUE')"));
+		assertEquals(
+				"\"AAAAAAAAAA-and-BBBBBBBBBB-end\"",
+				evaluate("format('{0}-and-{1}-end', 'AAAAAAAAAA', 'BBBBBBBBBB')"));
+
+		// Adjacent placeholders: nothing between them to resynchronise on.
+		assertEquals("\"AAAAABBBBB\"", evaluate("format('{0}{1}', 'AAAAA', 'BBBBB')"));
+
+		// An argument may be used more than once, and in any order.
+		assertEquals("\"b a b\"", evaluate("format('{1} {0} {1}', 'a', 'b')"));
+
+		// Inserted text is not rescanned, so a substituted brace stays literal.
+		assertEquals("\"{0} x\"", evaluate("format('{0} {1}', '{0}', 'x')"));
+
+		// {{ escapes a brace.
+		assertEquals("\"{0}\"", evaluate("format('{{0}', 1)"));
+		assertEquals("\"{x}\"", evaluate("format('{{{0}}', 'x')"));
+
+		// Nothing to do.
+		assertEquals("\"no placeholders\"", evaluate("format('no placeholders', 1)"));
+	}
+
+	/** Test of the errors reported by the format() assemble time function. */
+	@Test
+	public void testFormatErrors() {
+		System.out.println("format errors");
+
+		// An unterminated placeholder, with and without a parameter number, used to
+		// run off the end of the string instead of being reported.
+		assertFormatError("format('a{', 1)");
+		assertFormatError("format('a{0', 1)");
+		assertFormatError("format('{}', 1)");
+		assertFormatError("format('{a}', 1)");
+		assertFormatError("format('{5}', 1)");
+	}
+
+	/** Asserts that the given expression is rejected by the assembler. */
+	private static void assertFormatError(String expression) {
+		try {
+			String result = evaluate(expression);
+			fail(expression + " was accepted and gave " + result);
+		} catch (NslException e) {
+			System.out.println("  " + expression + " -> " + e.getMessage());
+		}
 	}
 }
