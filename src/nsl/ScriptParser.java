@@ -32,7 +32,7 @@ public class ScriptParser {
 	 *
 	 * @param path the script file path
 	 * @param noPauseOnError do not pause on error
-	 * @param noMakeNSIS do not run makensisw.exe
+	 * @param noMakeNSIS do not run the NSIS compiler
 	 * @return the exit code
 	 */
 	public static int parse(String path, boolean noPauseOnError, boolean noMakeNSIS)
@@ -124,22 +124,7 @@ public class ScriptParser {
 
 				// Build the NSIS script.
 				if (!noMakeNSIS) {
-					File makensisw = new File("..\\makensisw.exe");
-					if (makensisw.exists()) {
-						// Pass the arguments individually; Runtime.exec(String) splits the
-						// command on whitespace and does not honour embedded quotes, so any
-						// path containing a space would arrive as several arguments.
-						new ProcessBuilder(makensisw.getAbsolutePath(), outputFile.getCanonicalPath()).start();
-					} else {
-						stderr.println("Unable to compile \"" + outputFile.getCanonicalPath() + "\":");
-						// getAbsoluteFile() first: getParent() is null for a bare filename,
-						// which is what "..\makensisw.exe" is on a non-Windows filesystem.
-						stderr.println(
-								"  \"makensisw.exe\" not found in \""
-										+ makensisw.getAbsoluteFile().getParentFile().getCanonicalPath()
-										+ "\".");
-						if (!noPauseOnError) System.in.read();
-					}
+					exitCode = NsisCompiler.compile(outputFile, noPauseOnError, stdout, stderr);
 				}
 			}
 		}

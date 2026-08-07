@@ -35,7 +35,7 @@ public class Main {
 		System.out.println("  java -jar nsL.jar [Options] script.nsl");
 		System.out.println();
 		System.out.println("Options:");
-		System.out.println("  /nomake   Do not run makensisw.exe after assembling");
+		System.out.println("  /nomake   Do not run the NSIS compiler after assembling");
 		System.out.println("  /nopause  Do not wait for a key press on error");
 		System.exit(1);
 	}
