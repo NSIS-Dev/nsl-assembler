@@ -1,0 +1,30 @@
+[tools]
+hk = "1.53.0"
+java = "temurin-17"
+pkl = "latest"
+
+[env]
+HK_MISE = 1
+
+[hooks]
+postinstall = "hk install --mise"
+
+[tasks.build]
+description = "Build the JAR"
+run = "./gradlew build"
+
+[tasks.checks]
+description = "Run all checks (formatting, tests)"
+depends = ["lint", "test"]
+
+[tasks.format]
+description = "Format Java code with Spotless"
+run = "./gradlew spotlessApply --no-daemon -q"
+
+[tasks.lint]
+description = "Check Java formatting with Spotless"
+run = "./gradlew spotlessCheck --no-daemon -q"
+
+[tasks.test]
+description = "Run all tests"
+run = "./gradlew test"
