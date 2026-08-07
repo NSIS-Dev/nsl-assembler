@@ -51,7 +51,7 @@ public class SectionGetSizeInstruction extends AssembleExpression {
 	@Override
 	public void assemble(Register var) throws IOException {
 		Expression varOrIndex = AssembleExpression.getRegisterOrExpression(this.index);
-		ScriptParser.writeLine(name + " " + var + " " + varOrIndex);
+		ScriptParser.writeLine(name + " " + varOrIndex + " " + var);
 		varOrIndex.setInUse(false);
 	}
 }
