@@ -4,7 +4,7 @@
 
 package nsl.preprocessor;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import nsl.expression.Expression;
 
@@ -14,7 +14,9 @@ import nsl.expression.Expression;
  * @author Stuart
  */
 public class DefineList {
-	private final HashMap<String, Expression> constants;
+	// LinkedHashMap, not HashMap: getNames() feeds the !define/!undef emission
+	// order in NSISDirective, which must not depend on the JDK's hash ordering.
+	private final LinkedHashMap<String, Expression> constants;
 	private int count;
 
 	private static DefineList current = new DefineList();
@@ -30,7 +32,7 @@ public class DefineList {
 
 	/** Class constructor. */
 	public DefineList() {
-		this.constants = new HashMap<String, Expression>();
+		this.constants = new LinkedHashMap<String, Expression>();
 		this.count = 0;
 	}
 
