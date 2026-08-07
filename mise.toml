@@ -14,8 +14,12 @@ description = "Build the JAR"
 run = "./gradlew build"
 
 [tasks.checks]
-description = "Run all checks (formatting, tests)"
-depends = ["lint", "test"]
+description = "Run all checks (formatting, tests, e2e corpus)"
+depends = ["lint", "test:unit", "test:e2e"]
+
+[tasks."test:e2e"]
+description = "Assemble the e2e corpus and compile it with makensis"
+run = "./e2e/run.sh"
 
 [tasks.format]
 description = "Format Java code with Spotless"
@@ -25,6 +29,6 @@ run = "./gradlew spotlessApply --no-daemon -q"
 description = "Check Java formatting with Spotless"
 run = "./gradlew spotlessCheck --no-daemon -q"
 
-[tasks.test]
+[tasks."test:unit"]
 description = "Run all tests"
 run = "./gradlew test"

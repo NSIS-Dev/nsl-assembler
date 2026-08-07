@@ -1,0 +1,113 @@
+/*
+ * Filesystem instructions: embedding files, the file handle API, directory
+ * search, and attributes.
+ *
+ * Everything that writes writes under $INSTDIR or $PLUGINSDIR. As with the
+ * registry file, nothing here ever runs, but the corpus should not be capable
+ * of touching anything outside its own install directory even if it did.
+ */
+
+#include "guard.nsl"
+
+Name("22 inst files");
+OutFile("22-inst-files.exe");
+InstallDir("$TEMP\\nsL-corpus-22");
+
+section Test("files")
+{
+  SetOutPath($INSTDIR);
+
+  // --- Embedding files into the installer ---
+  File("fixtures/sample.txt");
+  File("fixtures/sample.txt", "renamed.txt");
+  File("fixtures/sample.ini");
+  FileRecursive("fixtures/subdir");
+
+  // --- Directories ---
+  CreateDirectory($INSTDIR."\\made\\deeper");
+  SetOutPath($INSTDIR."\\made");
+  SetOutPath($INSTDIR);
+
+  // --- The file handle API: open, write, seek, read, close ---
+  ClearErrors();
+  $R0 = FileOpen($INSTDIR."\\written.txt", "w");
+  if (!Errors())
+  {
+    FileWrite($R0, "first line\r\n");
+    FileWriteByte($R0, 65);
+    FileWriteWord($R0, 66);
+    FileWriteUTF16LE($R0, "wide\r\n");
+    FileClose($R0);
+  }
+
+  $R1 = FileOpen($INSTDIR."\\written.txt", "r");
+  if (!Errors())
+  {
+    $R2 = FileRead($R1);
+    $R3 = FileReadByte($R1);
+    $R4 = FileReadWord($R1);
+    $R5 = FileReadUTF16LE($R1);
+    DetailPrint("files: read ".$R2." ".$R3." ".$R4." ".$R5);
+
+    // Seek, in each of the three modes, with and without the position output.
+    FileSeek($R1, 0, "SET");
+    $R6 = FileSeek($R1, 4, "CUR");
+    $R7 = FileSeek($R1, 0, "END");
+    DetailPrint("files: seek ".$R6." ".$R7);
+
+    FileClose($R1);
+  }
+
+  // Appending, the third open mode.
+  $R8 = FileOpen($INSTDIR."\\written.txt", "a");
+  if (!Errors())
+  {
+    FileWrite($R8, "appended\r\n");
+    FileClose($R8);
+  }
+
+  // The read buffer size, in megabytes rather than bytes.
+  FileBufSize(1);
+
+  // --- Searching a directory ---
+  ($R9, $0) = FindFirst($INSTDIR."\\*.txt");
+  if ($0 !=S "")
+  {
+    while ($0 !=S "")
+    {
+      DetailPrint("files: found ".$0);
+      $0 = FindNext($R9);
+    }
+    FindClose($R9);
+  }
+
+  // --- Attributes and times ---
+  SetFileAttributes($INSTDIR."\\written.txt", "NORMAL");
+  SetFileAttributes($INSTDIR."\\written.txt", "READONLY|HIDDEN");
+  ($1, $2) = GetFileTime($INSTDIR."\\written.txt");
+  ($3, $4) = GetFileTimeLocal("fixtures/sample.txt");
+  DetailPrint("files: times ".$1." ".$2." ".$3." ".$4);
+
+  // --- Moving, copying and removing ---
+  Rename($INSTDIR."\\written.txt", $INSTDIR."\\moved.txt");
+  CopyFiles($INSTDIR."\\moved.txt", $INSTDIR."\\made");
+  Delete($INSTDIR."\\moved.txt");
+  RMDirRecursive($INSTDIR."\\made");
+
+  // --- Temporary files ---
+  InitPluginsDir();
+  $5 = GetTempFileName();
+  $6 = GetTempFileName($PLUGINSDIR);
+  DetailPrint("files: temp ".$5." ".$6);
+
+  WriteUninstaller($INSTDIR."\\Uninstall-22.exe");
+}
+
+uninstall section Uninstall("Uninstall")
+{
+  Delete($INSTDIR."\\sample.txt");
+  Delete($INSTDIR."\\renamed.txt");
+  Delete($INSTDIR."\\sample.ini");
+  Delete($INSTDIR."\\Uninstall-22.exe");
+  RMDirRecursive($INSTDIR);
+}

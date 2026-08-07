@@ -1,0 +1,67 @@
+/*
+ * String literals: the three quote characters, escape sequences, the verbatim
+ * "@" prefix, and format().
+ *
+ * nsL diverges from NSIS here - "$\" is gone and the escapes are C-style - so
+ * this is one of the easier places to emit something NSIS reads differently
+ * from what the author wrote.
+ */
+
+#include "guard.nsl"
+
+Name("03 strings");
+OutFile("03-strings.exe");
+
+section Test("strings")
+{
+  // All three quote characters are interchangeable.
+  DetailPrint("double quoted");
+  DetailPrint('single quoted');
+  DetailPrint(`back quoted`);
+
+  // Each quote character lets the other two through untouched.
+  DetailPrint('contains "double" quotes');
+  DetailPrint("contains 'single' quotes");
+  DetailPrint(`contains "both" of 'them'`);
+
+  // Escape sequences.
+  DetailPrint("tab:\there");
+  DetailPrint("newline:\r\nsecond line");
+  DetailPrint("escaped quote: \" and backslash: \\");
+
+  // A verbatim string keeps its backslashes, which is what Windows paths want.
+  DetailPrint(@"C:\no\escapes\here");
+  DetailPrint(@'verbatim \r\n stays literal');
+
+  // The same path written both ways must mean the same thing.
+  $R0 = @"\a\b\c";
+  $R1 = "\\a\\b\\c";
+  DetailPrint("paths equal: ".($R0 ==S $R1));
+
+  // Variables cannot appear inside a quoted string; concatenate instead.
+  $R2 = "world";
+  DetailPrint("hello ".$R2);
+
+  // ... or use format(), which is resolved at assemble time.
+  DetailPrint(format("hello {0}", $R2));
+  DetailPrint(format("{0} then {1} then {0} again", "first", "second"));
+  // Doubling a brace escapes it, so the first {0} here is literal text.
+  DetailPrint(format("a literal brace: {{0} is not a placeholder, {0} is", "this"));
+  DetailPrint(format("{0}-{1}-{2}", 1, true, $WINDIR));
+  // A result shorter than the format string, and two adjacent placeholders:
+  // both used to walk the assembler's index off the string.
+  DetailPrint(format("{0}", 1));
+  DetailPrint(format("{0}{1}", "AAAAA", "BBBBB"));
+
+  // Assemble-time length of a literal, versus the run-time instruction.
+  DetailPrint("assemble-time length = ".length("abcdef"));
+  // StrLen() rejects any argument the assembler considers literal, and a plain
+  // register counts as one, so its operand has to be a nested instruction call.
+  // See KNOWN-GAPS.md.
+  $R3 = StrLen(ReadEnvStr("PATH"));
+  DetailPrint("run-time length = ".$R3);
+
+  // An empty string is a legal operand.
+  $R4 = "";
+  DetailPrint("empty is empty: ".($R4 ==S ""));
+}

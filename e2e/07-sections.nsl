@@ -1,0 +1,85 @@
+/*
+ * Sections and section groups, across every argument the section header takes.
+ *
+ * The arguments are positional and all optional, which is exactly the shape
+ * that hides an off-by-one: readOnly, optional and bold are booleans in that
+ * order, and any trailing integers are InstTypes.
+ */
+
+#include "guard.nsl"
+
+Name("07 sections");
+OutFile("07-sections.exe");
+
+InstType("Full");
+InstType("Minimal");
+
+section Plain()
+{
+  DetailPrint("section: no arguments at all");
+}
+
+section Described("A described section")
+{
+  DetailPrint("section: description only");
+}
+
+section ReadOnly("Read only", true)
+{
+  DetailPrint("section: read only");
+}
+
+section Optional("Unchecked by default", false, true)
+{
+  DetailPrint("section: optional");
+}
+
+section Bold("Bold on the components page", false, false, true)
+{
+  DetailPrint("section: bold");
+}
+
+section InInstTypes("In both install types", false, false, false, 1, 2)
+{
+  DetailPrint("section: instTypes 1 and 2");
+}
+
+// The booleans can be skipped entirely before the InstType numbers.
+section InstTypesOnly("InstTypes without the flags", 1)
+{
+  DetailPrint("section: instType 1");
+}
+
+// SectionIn does the same job from inside the body; true means read only.
+section WithSectionIn("Uses SectionIn")
+{
+  SectionIn(1, 2);
+  DetailPrint("section: SectionIn");
+}
+
+// A hidden section: an empty description means NSIS does not list it.
+section Hidden("")
+{
+  DetailPrint("section: hidden");
+}
+
+// AddSize adjusts the reported install size from inside a section.
+section WithAddSize("Reports extra size")
+{
+  AddSize(100);
+  DetailPrint("section: AddSize");
+}
+
+/*
+ * Section groups are not covered. SectionGroupStatement parses its body with a
+ * BlockStatement, which refuses to run in global context - so every spelling of
+ * "sectiongroup" fails with "code block can only be used in a function or
+ * section context" and the keyword is unusable. See KNOWN-GAPS.md.
+ */
+
+// --- Uninstaller side ---
+
+uninstall section Uninstall("Uninstall")
+{
+  DetailPrint("un.section: plain");
+}

@@ -1,0 +1,4 @@
+# Assembled and compiled output, when a script is run in place rather than in a
+# scratch copy.
+*.nsi
+*.exe

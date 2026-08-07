@@ -1,0 +1,133 @@
+/*
+ * Every operator nsL defines, in both the assemble-time-constant and the
+ * run-time-register form.
+ *
+ * The two forms matter: the assembler folds an expression whose operands are
+ * all literals, so "9 + 9" never reaches NSIS and proves nothing about the
+ * emitted IntOp. Each group below therefore does the same work twice.
+ */
+
+#include "guard.nsl"
+
+Name("02 operators");
+OutFile("02-operators.exe");
+
+section Test("operators")
+{
+  // --- Arithmetic, folded at assemble time ---
+  DetailPrint("fold + = ".(9 + 4));
+  DetailPrint("fold - = ".(9 - 4));
+  DetailPrint("fold * = ".(9 * 4));
+  DetailPrint("fold / = ".(9 / 4));
+  DetailPrint("fold % = ".(9 % 4));
+  DetailPrint("fold | = ".(9 | 4));
+  DetailPrint("fold & = ".(9 & 4));
+  DetailPrint("fold ^ = ".(9 ^ 4));
+  DetailPrint("fold ~ = ".(~9));
+
+  // --- Arithmetic, emitted as IntOp ---
+  $R0 = 9;
+  $R1 = 4;
+  $0 = $R0 + $R1;
+  $1 = $R0 - $R1;
+  $2 = $R0 * $R1;
+  $3 = $R0 / $R1;
+  $4 = $R0 % $R1;
+  $5 = $R0 | $R1;
+  $6 = $R0 & $R1;
+  $7 = $R0 ^ $R1;
+  $8 = ~$R0;
+  $9 = -$R0;
+  DetailPrint($0." ".$1." ".$2." ".$3." ".$4);
+  DetailPrint($5." ".$6." ".$7." ".$8." ".$9);
+
+  // Shifts.
+  $0 = $R0 < 2;
+  $1 = $R0 > 2;
+  DetailPrint("shifts ".$0." ".$1);
+
+  // Precedence and explicit grouping must not agree by accident.
+  DetailPrint("prec  = ".(2 + 3 * 4 - 6 / 2));
+  DetailPrint("group = ".((2 + 3) * (4 - 6) / 2));
+  $R2 = 2;
+  $R3 = 3;
+  $0 = $R2 + $R3 * 4 - 6 / $R2;
+  $1 = ($R2 + $R3) * (4 - 6) / $R2;
+  DetailPrint("prec  = ".$0);
+  DetailPrint("group = ".$1);
+
+  // --- Comparison: signed, unsigned (u), case sensitive (S), insensitive (s) ---
+  $R0 = 5;
+  $R1 = 9;
+  $0 = $R0 == $R1;
+  $1 = $R0 != $R1;
+  $2 = $R0 >= $R1;
+  $3 = $R0 <= $R1;
+  $4 = $R1 >=u $R0;
+  $5 = $R1 <=u $R0;
+  DetailPrint($0." ".$1." ".$2." ".$3." ".$4." ".$5);
+
+  $R2 = "Text";
+  $0 = $R2 ==s "text";
+  $1 = $R2 ==S "text";
+  $2 = $R2 !=s "text";
+  $3 = $R2 !=S "text";
+  DetailPrint($0." ".$1." ".$2." ".$3);
+
+  // StrCmp is documented as the same thing; assert both forms assemble.
+  $0 = StrCmp($R2, "text");
+  $1 = StrCmpS($R2, "text");
+  DetailPrint($0." ".$1);
+
+  // --- Boolean ---
+  DetailPrint("fold && = ".(true && false));
+  DetailPrint("fold || = ".(true || false));
+  DetailPrint("fold !  = ".(!true));
+
+  $R0 = 1;
+  $R1 = 0;
+  $0 = $R0 > 0 && $R1 > 0;
+  $1 = $R0 > 0 || $R1 > 0;
+  $2 = !($R0 > 0);
+  $3 = ($R0 == 1 || $R1 > 0) && $R0 == 1 && !($R1 == 4 || $R0 == 2);
+  DetailPrint($0." ".$1." ".$2." ".$3);
+
+  // --- Concatenation ---
+  $R0 = "one";
+  $R1 = "two";
+  DetailPrint($R0.$R1);
+  DetailPrint("a".$R0."b".$R1."c".1.2.3);
+
+  // --- Ternary, both folded and emitted ---
+  $R0 = 7;
+  $0 = $R0 >= 0 ? $R0 : 0;
+  $1 = true ? "taken" : "not taken";
+  $2 = $R0 > 0 ? ($R0 > 5 ? "big" : "small") : "negative";
+  DetailPrint($0." ".$1." ".$2);
+  DetailPrint($R0 > 0 ? "ternary in an argument" : "no");
+
+  // --- Assignment, every compound form ---
+  $R0 = 64;
+  $R0 += 2;
+  $R0 -= 1;
+  $R0 *= 3;
+  $R0 /= 2;
+  $R0 %= 50;
+  $R0 |= 8;
+  $R0 &= 60;
+  $R0 ^= 5;
+  $R0 <<= 2;
+  $R0 >>= 1;
+  DetailPrint("compound = ".$R0);
+
+  // Increment and decrement.
+  $R1 = 0;
+  $R1++;
+  $R1--;
+  DetailPrint("incdec = ".$R1);
+
+  // Assignment inside an expression, evaluated left to right.
+  $R2 = 3;
+  $0 = ($R2 = 9) > 5 || $R2 == 3;
+  DetailPrint("inline assign = ".$0." ".$R2);
+}

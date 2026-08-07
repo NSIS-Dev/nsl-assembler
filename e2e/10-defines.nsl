@@ -1,0 +1,81 @@
+/*
+ * #define, #redefine, #undef and defined().
+ *
+ * The distinction that matters is when the value is evaluated. A plain #define
+ * evaluates at definition, so the constant holds a result. A backquoted one
+ * evaluates at substitution, so the constant holds a fragment of source that
+ * need not be a complete expression - and may refer to names that do not exist
+ * yet.
+ */
+
+#include "guard.nsl"
+
+Name("10 defines");
+OutFile("10-defines.exe");
+
+// --- Evaluated at definition ---
+
+#define AnInt 60
+#define AnExpression 9 * 5 + AnInt
+#define AString "a string"
+#define ABoolean true
+
+section Test("defines")
+{
+  DetailPrint("AnInt        = ".AnInt);
+  DetailPrint("AnExpression = ".AnExpression);
+  DetailPrint("AString      = ".AString);
+  DetailPrint("ABoolean     = ".ABoolean);
+
+  // --- Evaluated at substitution ---
+
+  // A complete expression, deferred.
+  #define Deferred `AnInt + 5`
+  DetailPrint("Deferred     = ".Deferred);
+
+  // Fragments that are not expressions on their own, pasted together.
+  #define Head `99 +`
+  #define Middle `(55 -`
+  #define Tail `2) * 3`
+  DetailPrint("Fragments    = ".(Head Middle Tail));
+
+  // An operator, a function name and its argument, each held in a constant.
+  #define Left 5
+  #define Op `>`
+  #define Right 6
+  #define Call `DetailPrint`
+  #define Arg "constants can hold anything"
+  if (Left Op Right)
+    DetailPrint("unreachable");
+  else
+    Call(Arg);
+
+  // Building a value by concatenation.
+  #define PartOne 'Hello, '
+  #define PartTwo 'world'
+  #define Joined `"`.PartOne.PartTwo.`"`
+  DetailPrint(Joined);
+
+  // A deferred value may name a constant defined only later.
+  #define UsesLater `LaterConstant + 1`
+  #define LaterConstant 10
+  DetailPrint("UsesLater    = ".UsesLater);
+
+  // --- defined(), #redefine and #undef ---
+
+  DetailPrint("defined(AnInt)             = ".defined(AnInt));
+  DetailPrint("defined(AnInt, AString)    = ".defined(AnInt, AString));
+  DetailPrint("defined(NeverDefined)      = ".defined(NeverDefined));
+  DetailPrint("defined(AnInt, NotDefined) = ".defined(AnInt, NotDefined));
+
+  // #define on an existing name is an error; #redefine is how you change one.
+  #redefine AnInt 61
+  DetailPrint("redefined AnInt = ".AnInt);
+
+  #undef AnInt
+  DetailPrint("after #undef    = ".defined(AnInt));
+
+  // And it can be defined again once undefined.
+  #define AnInt 62
+  DetailPrint("defined again   = ".AnInt);
+}

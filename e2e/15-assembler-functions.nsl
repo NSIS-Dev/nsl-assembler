@@ -1,0 +1,101 @@
+/*
+ * The special assemble-time functions: returnvar, toint, eval, defined, type,
+ * format, length, nsisconst.
+ *
+ * None of them emit an instruction. Each one either folds into a literal or
+ * changes what gets parsed, so the check is what ends up in the .nsi rather
+ * than what happens at run time.
+ */
+
+#include "guard.nsl"
+
+Name("15 assembler functions");
+OutFile("15-assembler-functions.exe");
+
+section Test("assembler functions")
+{
+  /*
+   * --- toint(): every accepted argument shape ---
+   *
+   * The documented hexadecimal string form is absent, because it does not work
+   * in either spelling: toint("0xFF") reaches Integer.parseInt("0xFF", 16),
+   * which rejects the prefix, and toint("FF") is parsed as decimal. Both warn
+   * and return 0. See KNOWN-GAPS.md.
+   *
+   * The optional second argument is the value to fall back to when the
+   * conversion fails; it is undocumented but works.
+   */
+  DetailPrint("toint decimal string = ".toint("255"));
+  DetailPrint("toint with a default = ".toint("not a number", -1));
+  DetailPrint("toint true           = ".toint(true));
+  DetailPrint("toint false          = ".toint(false));
+  DetailPrint("toint integer        = ".toint(42));
+  DetailPrint("toint $INSTDIR       = ".toint($INSTDIR));
+
+  // A register argument has to be in scope first, even though toint never
+  // reads it at run time - it converts the register's index, not its value.
+  $0 = 0;
+  $9 = 0;
+  $R0 = 0;
+  DetailPrint("toint $0             = ".toint($0));
+  DetailPrint("toint $9             = ".toint($9));
+  DetailPrint("toint $R0            = ".toint($R0));
+
+  // --- type(): the five categories ---
+  DetailPrint("type integer  = ".type(42));
+  DetailPrint("type string   = ".type("s"));
+  DetailPrint("type boolean  = ".type(true));
+  DetailPrint("type register = ".type($R0));
+  DetailPrint("type constant = ".type($WINDIR));
+
+  // --- length(): characters in a literal, without StrLen at run time ---
+  DetailPrint("length empty  = ".length(""));
+  DetailPrint("length six    = ".length("abcdef"));
+  // length() measures the string after escape translation into NSIS form,
+  // where a tab is the three characters "$\t" - so this is 5, not 3.
+  DetailPrint("length escape = ".length("a\tb"));
+
+  // --- defined() ---
+  #define Present 1
+  DetailPrint("defined one       = ".defined(Present));
+  DetailPrint("defined several   = ".defined(Present, Present));
+  DetailPrint("defined missing   = ".defined(Absent));
+  DetailPrint("defined one of two = ".defined(Present, Absent));
+
+  // --- format() ---
+  DetailPrint(format("format: x{0}x{1}x", "first", "second"));
+  // Substituted text is not itself rescanned, so a brace inside an argument
+  // stays literal rather than being read as another placeholder.
+  DetailPrint(format("format: {0} {1}", "{0}", "not substituted twice"));
+
+  // --- nsisconst(): emit ${name} for something NSIS defines and nsL does not
+  #nsis
+    !define CorpusDefine "defined in raw NSIS"
+  #nsisend
+  DetailPrint("nsisconst = ".nsisconst(CorpusDefine));
+
+  // --- eval(): parse a string as nsL source ---
+  eval("DetailPrint('eval: a whole statement');");
+  DetailPrint("eval: an expression = ".eval("1 + 1"));
+
+  // Built up by concatenation, which is the point of it.
+  #define Fn "DetailPrint"
+  #define Msg "'eval: built by concatenation'"
+  eval(Fn."(".Msg.");");
+
+  // --- returnvar(): the nth register being assigned to ---
+  #macro FirstTarget()
+    // Assigning a register to itself emits nothing at all.
+    #return returnvar(1)
+  #macroend
+
+  #macro BothTargets()
+    #return (returnvar(1), returnvar(2))
+  #macroend
+
+  $R0 = 1;
+  $R1 = 2;
+  $R0 = FirstTarget();
+  ($R0, $R1) = BothTargets();
+  DetailPrint("returnvar left them alone: ".$R0." ".$R1);
+}

@@ -1,0 +1,35 @@
+/*
+ * #include, and the path rule that governs it.
+ *
+ * IncludeDirective opens the file with new FileReader(path), so every include
+ * path is relative to the assembler's working directory - not to the file doing
+ * the including. A nested include therefore has to be written from the point of
+ * view of the run, which is why fixtures/includes-another.nsl says
+ * "fixtures/included.nsl" rather than "included.nsl".
+ *
+ * guard.nsl is itself an include, so every other file in the corpus exercises
+ * the simple case; this one covers nesting and what crosses the boundary.
+ */
+
+#include "guard.nsl"
+#include "fixtures/includes-another.nsl"
+
+Name("13 include");
+OutFile("13-include.exe");
+
+section Test("include")
+{
+  // A constant defined in the directly included file.
+  DetailPrint("nested constant  = ".NestedConstant);
+
+  // ... and one from the file that file included in turn.
+  DetailPrint("deeper constant  = ".IncludedConstant);
+
+  // A global initialiser from an included file, which lands in .onInit like any
+  // other.
+  DetailPrint("included global  = ".$includedGlobal);
+
+  // A function defined in an included file.
+  $R0 = IncludedFunction(41);
+  DetailPrint("included function = ".$R0);
+}

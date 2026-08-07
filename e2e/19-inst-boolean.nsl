@@ -1,0 +1,110 @@
+/*
+ * Instructions whose value is a Boolean.
+ *
+ * In NSIS these are branch instructions - IfErrors, IfFileExists and friends,
+ * each taking a pair of labels. nsL turns them into expressions, so the same
+ * instruction has to assemble one way inside an if condition and another way
+ * when its result is stored in a variable. Both forms are covered here for each
+ * one, plus their use inside compound conditions where the assembler has to
+ * chain the jumps together.
+ */
+
+#include "guard.nsl"
+
+Name("19 inst boolean");
+OutFile("19-inst-boolean.exe");
+
+section Test("boolean instructions")
+{
+  // --- As a condition ---
+
+  ClearErrors();
+  if (Errors())
+    DetailPrint("bool: Errors");
+  else
+    DetailPrint("bool: no errors");
+
+  if (FileExists($EXEDIR))
+    DetailPrint("bool: FileExists");
+
+  if (Silent())
+    DetailPrint("bool: silent");
+  else
+    DetailPrint("bool: not silent");
+
+  if (RebootFlag())
+    DetailPrint("bool: reboot flag set");
+
+  if (IsWindow($HWNDPARENT))
+    DetailPrint("bool: IsWindow");
+
+  if (AbortCalled())
+    DetailPrint("bool: AbortCalled");
+
+  // --- Negated ---
+
+  if (!Errors())
+    DetailPrint("bool: negated");
+
+  // --- Stored in a variable ---
+
+  $R0 = Errors();
+  $R1 = FileExists($EXEDIR);
+  $R2 = Silent();
+  $R3 = RebootFlag();
+  $R4 = IsWindow($HWNDPARENT);
+  DetailPrint("bool: ".$R0." ".$R1." ".$R2." ".$R3." ".$R4);
+
+  // --- In compound conditions, where the jumps have to be threaded together ---
+
+  if (FileExists($EXEDIR) && !Errors())
+    DetailPrint("bool: and");
+
+  if (Silent() || FileExists($EXEDIR))
+    DetailPrint("bool: or");
+
+  if ((Silent() || RebootFlag()) && FileExists($EXEDIR) && !Errors())
+    DetailPrint("bool: nested");
+
+  // --- Compared against a literal ---
+
+  if (FileExists($EXEDIR) == true)
+    DetailPrint("bool: compared to true");
+
+  if (Silent() != true)
+    DetailPrint("bool: compared to false");
+
+  // --- Driving a loop ---
+
+  $R5 = 0;
+  while (!Errors() && $R5 < 2)
+  {
+    DetailPrint("bool: loop ".$R5);
+    $R5++;
+  }
+
+  // --- As a switch subject ---
+
+  /*
+   * The subject goes through a variable. Using the instruction directly emits
+   * the branch after the case bodies, referring back to a label ahead of it,
+   * and makensis then warns that the label is not used. See KNOWN-GAPS.md.
+   */
+  $R6 = FileExists($EXEDIR);
+  switch ($R6)
+  {
+    case true:
+      DetailPrint("bool: switch true");
+      break;
+    case false:
+      DetailPrint("bool: switch false");
+      break;
+  }
+
+  // --- MessageBox, whose value is a button name rather than a Boolean ---
+
+  if (MessageBox("MB_YESNO|MB_ICONQUESTION", "Never shown") == "IDYES")
+    DetailPrint("bool: MessageBox yes");
+  else
+    DetailPrint("bool: MessageBox no");
+}

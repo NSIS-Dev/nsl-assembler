@@ -1,0 +1,89 @@
+/*
+ * Registry and INI instructions.
+ *
+ * Every write here targets HKCU under a key of its own. Nothing in this file
+ * ever runs - guard.nsl sees to that - but the corpus should still not be
+ * writing anywhere a stray execution could do damage, and HKCU is the only
+ * hive a "user" execution level can reach at all.
+ */
+
+#include "guard.nsl"
+
+Name("21 inst registry");
+OutFile("21-inst-registry.exe");
+
+#define CorpusKey "Software\\nsL-corpus\\e2e"
+
+section Test("registry")
+{
+  // --- Writing, one instruction per value type ---
+  WriteRegStr("HKCU", CorpusKey, "AString", "a value");
+  WriteRegExpandStr("HKCU", CorpusKey, "AnExpandString", "%TEMP%\\thing");
+  WriteRegDWORD("HKCU", CorpusKey, "ADword", 1);
+  WriteRegBin("HKCU", CorpusKey, "ABinary", "DEADBEEF");
+  // The value is a hex string, not a delimited list: WriteRegMultiStr always
+  // emits /REGEDIT5, which is the form NSIS documents as taking hex.
+  WriteRegMultiStr("HKCU", CorpusKey, "AMultiString", "610000000000");
+  WriteRegNone("HKCU", CorpusKey, "ANone");
+
+  // --- Reading ---
+  $R0 = ReadRegStr("HKCU", CorpusKey, "AString");
+  $R1 = ReadRegDWORD("HKCU", CorpusKey, "ADword");
+  DetailPrint("registry: ".$R0." ".$R1);
+
+  // The default value of a key is the empty value name.
+  WriteRegStr("HKCU", CorpusKey, "", "the default value");
+  $R2 = ReadRegStr("HKCU", CorpusKey, "");
+  DetailPrint("registry: default = ".$R2);
+
+  // --- Enumerating ---
+  $R3 = EnumRegKey("HKCU", "Software\\nsL-corpus", 0);
+  $R4 = EnumRegValue("HKCU", CorpusKey, 0);
+  DetailPrint("registry: ".$R3." ".$R4);
+
+  // Enumeration in a loop, which is what it is for.
+  for ($i = 0; $i < 3; $i++)
+  {
+    $R5 = EnumRegValue("HKCU", CorpusKey, $i);
+    if ($R5 ==S "")
+      break;
+    DetailPrint("registry: value ".$i." = ".$R5);
+  }
+
+  // --- The 32/64-bit view, which changes what all of the above see ---
+  SetRegView("64");
+  $R6 = GetRegView();
+  SetRegView("32");
+  SetRegView("default");
+  DetailPrint("registry: view was ".$R6);
+
+  // --- Every root key nsL accepts ---
+  $R7 = ReadRegStr("HKCR", ".txt", "");
+  $R8 = ReadRegStr("HKLM", "Software\\Microsoft\\Windows\\CurrentVersion", "ProgramFilesDir");
+  $R9 = ReadRegStr("HKU", ".DEFAULT\\Environment", "TEMP");
+  $0 = ReadRegStr("HKCC", "System\\CurrentControlSet\\Control\\Print", "");
+  DetailPrint("registry: roots ".$R7." ".$R8." ".$R9." ".$0);
+
+  // --- INI files, the same shape without a hive ---
+  $1 = "$PLUGINSDIR\\corpus.ini";
+  WriteINIStr($1, "Section", "Value", "written");
+  $2 = ReadINIStr($1, "Section", "Value");
+  DetailPrint("ini: ".$2);
+
+  DeleteINIStr($1, "Section", "Value");
+  DeleteINISec($1, "Section");
+  FlushINI($1);
+
+  // --- Deleting, including the switch forms ---
+  DeleteRegValue("HKCU", CorpusKey, "AString");
+  DeleteRegKey("HKCU", CorpusKey);
+  // Delete only if the key has no subkeys.
+  DeleteRegKey("HKCU", "Software\\nsL-corpus", true);
+
+  WriteUninstaller($INSTDIR."\\Uninstall-21.exe");
+}
+
+uninstall section Uninstall("Uninstall")
+{
+  DeleteRegKey("HKCU", "Software\\nsL-corpus");
+}

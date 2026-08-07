@@ -1,0 +1,106 @@
+/*
+ * Installer attributes: the instructions that are only legal at global scope.
+ *
+ * These configure the installer rather than doing anything at run time, and
+ * most take a fixed set of literal keywords. Getting one of those keywords
+ * wrong produces a script that assembles and then fails to compile, which is
+ * exactly the gap between a textual diff and this suite.
+ */
+
+#include "guard.nsl"
+
+// Unicode has to come before anything that touches the header or the compressed
+// data, so it goes first.
+Unicode(true);
+
+Name("16 attributes");
+Caption("16 attributes - caption");
+SubCaption(0, "custom page caption");
+BrandingText("corpus build");
+OutFile("16-attributes.exe");
+
+// Install directory, and where to read a previous one back from.
+InstallDir("$PROGRAMFILES\\nsL-corpus");
+InstallDirRegKey("HKLM", "Software\\nsL-corpus", "InstallDir");
+
+// Compression.
+SetCompressor("lzma", true);
+SetCompressorDictSize(8);
+SetCompress("auto");
+SetDatablockOptimize("on");
+
+// Behaviour and appearance.
+XPStyle("on");
+ShowInstDetails("show");
+ShowUninstDetails("hide");
+AutoCloseWindow(false);
+CRCCheck("on");
+SetDateSave("on");
+SetOverwrite("on");
+AllowRootDirInstall(false);
+AllowSkipFiles("on");
+InstProgressFlags("smooth");
+LicenseForceSelection("off");
+SpaceTexts("auto");
+
+// Text on the standard pages.
+ComponentText("Choose components", "Top text", "Sub text");
+InstallButtonText("Go");
+DetailsButtonText("Details");
+CompletedText("All done");
+MiscButtonText("Back", "Next", "Cancel", "Close");
+// UninstallIcon is not covered here: it needs a real .ico laid out as NSIS
+// expects. See KNOWN-GAPS.md.
+UninstallButtonText("Remove");
+UninstallCaption("16 attributes - uninstall");
+UninstallSubCaption(0, "custom uninstall page caption");
+UninstallText("This removes the corpus build.");
+FileErrorText("Could not write $0");
+
+// Colours and fonts.
+InstallColors("000000", "FFFFFF");
+LicenseBkColor("FFFFFF");
+// Both forms of SetFont: the optional third argument is a language id, which
+// NSIS wants as a leading /LANG= switch rather than a trailing operand.
+SetFont("Tahoma", 8);
+SetFont("Tahoma", 8, 1033);
+
+// Version information. VIProductVersion has to come first, and the four keys
+// NSIS calls standard have to be present or it warns about each missing one.
+VIProductVersion("1.0.0.0");
+VIAddVersionKey("ProductName", "nsL corpus");
+VIAddVersionKey("FileVersion", "1.0.0.0");
+VIAddVersionKey("FileDescription", "attributes corpus build");
+VIAddVersionKey("LegalCopyright", "none");
+VIAddVersionKey("Comments", "language-tagged key", 1033);
+
+// Install types, referenced by the sections below.
+InstType("Full");
+InstType("Minimal");
+
+// Language strings.
+LangString("CorpusString", 1033, "a language string");
+
+page Components();
+// A PageEx block, which is where the directory-page attributes belong: NSIS
+// rejects DirVerify and DirText outside one even though nsL accepts them at
+// global scope. See KNOWN-GAPS.md.
+page Directory()
+{
+  DirVerify("auto");
+  DirText("Choose a directory", "Sub text", "Browse", "No space text");
+}
+page InstFiles();
+uninstall page UninstConfirm();
+uninstall page InstFiles();
+
+section Test("attributes", false, false, false, 1, 2)
+{
+  AddSize(64);
+  DetailPrint("attributes: section body");
+}
+
+uninstall section Uninstall("Uninstall")
+{
+  DetailPrint("attributes: uninstall body");
+}

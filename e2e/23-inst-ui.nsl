@@ -1,0 +1,102 @@
+/*
+ * Window, dialog and process instructions.
+ *
+ * These are the ones that only make sense against a live installer window, so
+ * the compile check is all the assurance available for them - which is exactly
+ * why having it matters here more than anywhere else in the corpus.
+ */
+
+#include "guard.nsl"
+
+Name("23 inst ui");
+OutFile("23-inst-ui.exe");
+
+page Components();
+page Directory();
+page InstFiles();
+
+function .onGUIInit()
+{
+  // The installer window and its children.
+  $R0 = GetDlgItem($HWNDPARENT, 1);
+  // Both take an integer. NSIS spells these ${SW_SHOW} and friends, but those
+  // come from an .nsh nsL does not include, so the numbers are literal here.
+  EnableWindow($R0, 1);
+  ShowWindow($R0, 5);
+
+  $R1 = CreateFont("Tahoma", 10, 700, true, false);
+  SendMessage($R0, 0x0030, $R1, 1);
+
+  /*
+   * SetCtlColors is not covered: it only implements the assemble-into-a-
+   * register form, so calling it as a statement - which is the only way it can
+   * be called, since it returns nothing - throws UnsupportedOperationException
+   * out of the assembler. See KNOWN-GAPS.md.
+   */
+
+  BringToFront();
+}
+
+section Test("ui")
+{
+  // --- Message boxes: the flag sets, and the return value ---
+  MessageBox("MB_OK", "Never shown");
+  MessageBox("MB_OK|MB_ICONINFORMATION", "Never shown");
+  $R0 = MessageBox("MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2", "Never shown");
+  DetailPrint("ui: MessageBox returned ".$R0);
+
+  if (MessageBox("MB_RETRYCANCEL|MB_ICONEXCLAMATION", "Never shown") == "IDRETRY")
+    DetailPrint("ui: retry");
+
+  // --- The details window ---
+  SetDetailsView("hide");
+  SetDetailsView("show");
+  DetailPrint("ui: DetailPrint");
+  SetDetailsPrint("textonly");
+  DetailPrint("ui: text only");
+  SetDetailsPrint("both");
+
+  // --- The main window ---
+  HideWindow();
+  BringToFront();
+  LockWindow("on");
+  LockWindow("off");
+
+  // --- Finding and talking to windows ---
+  $R1 = FindWindow("#32770", "");
+  $R2 = FindWindow("#32770", "", $HWNDPARENT);
+  $R3 = IsWindow($HWNDPARENT);
+  DetailPrint("ui: windows ".$R1." ".$R2." ".$R3);
+
+  // SendMessage, with and without a return value and with a timeout.
+  SendMessage($HWNDPARENT, 0x0010, 0, 0);
+  $R4 = SendMessage($HWNDPARENT, 0x000E, 0, 0);
+  DetailPrint("ui: SendMessage returned ".$R4);
+
+  // --- Section text and flags, which drive the components page ---
+  SectionSetText(0, "renamed at run time");
+  SectionSetFlags(0, 1);
+  SectionSetSize(0, 100);
+  SectionSetInstTypes(0, 1);
+  InstTypeSetText(0, "renamed install type");
+  SetCurInstType(0);
+
+  /*
+   * SetBrandingImage has the same defect as SetCtlColors and is not covered
+   * either: it rejects being given a return variable and then throws from the
+   * statement form, so there is no way to call it. See KNOWN-GAPS.md.
+   */
+
+  // --- Running things ---
+  Exec($SYSDIR."\\notepad.exe");
+  ExecWait($SYSDIR."\\notepad.exe");
+  $R5 = ExecWait($SYSDIR."\\notepad.exe");
+  ExecShell("open", "https://nsis.sourceforge.io");
+  DetailPrint("ui: exit code ".$R5);
+
+  // --- Waiting and rebooting ---
+  SetRebootFlag(true);
+  if (RebootFlag())
+    DetailPrint("ui: would reboot");
+  SetRebootFlag(false);
+}

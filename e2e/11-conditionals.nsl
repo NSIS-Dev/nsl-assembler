@@ -1,0 +1,107 @@
+/*
+ * #if / #elseif / #else / #endif.
+ *
+ * These decide what is assembled at all, so the check that matters is not only
+ * that the taken branch is right but that the untaken ones leave nothing
+ * behind - no stray label, no declared-but-unused variable.
+ */
+
+#include "guard.nsl"
+
+Name("11 conditionals");
+OutFile("11-conditionals.exe");
+
+#define Version 3
+#define Feature true
+
+// At global scope, choosing between whole declarations.
+#if Version >= 3
+  #define VersionName "three or later"
+#else
+  #define VersionName "older"
+#endif
+
+#if Feature
+function FeatureFunction()
+{
+  DetailPrint("conditional: the function that got assembled");
+}
+#else
+function FeatureFunction()
+{
+  DetailPrint("conditional: the function that did not");
+}
+#endif
+
+section Test("conditionals")
+{
+  DetailPrint("VersionName = ".VersionName);
+  FeatureFunction();
+
+  // Simple two-way.
+  #if Version == 3
+    DetailPrint("if: version is 3");
+  #else
+    DetailPrint("if: version is not 3");
+  #endif
+
+  // Full chain, with the match in the middle.
+  #if Version == 1
+    DetailPrint("chain: one");
+  #elseif Version == 2
+    DetailPrint("chain: two");
+  #elseif Version == 3
+    DetailPrint("chain: three");
+  #elseif Version == 4
+    DetailPrint("chain: four");
+  #else
+    DetailPrint("chain: none");
+  #endif
+
+  // No matching arm and no else: nothing is emitted at all.
+  #if Version == 99
+    DetailPrint("never emitted");
+  #endif
+
+  // Conditions built from defined() and from boolean constants.
+  #if defined(Version)
+    DetailPrint("defined: Version is defined");
+  #endif
+
+  #if !defined(NeverDefined)
+    DetailPrint("defined: NeverDefined is not");
+  #endif
+
+  #if Feature && Version > 2
+    DetailPrint("compound: both held");
+  #endif
+
+  // Nested.
+  #if Version >= 2
+    #if Feature
+      #if Version < 10
+        DetailPrint("nested: three deep");
+      #else
+        DetailPrint("nested: not this");
+      #endif
+    #endif
+  #endif
+
+  /*
+   * #if wraps whole statements only - it is matched where a statement is
+   * expected, so it cannot appear part way through one. The ternary operator is
+   * the in-line equivalent, and folds the same way when its condition is known
+   * at assemble time.
+   */
+  DetailPrint("partial: ".(Feature ? "feature on" : "feature off"));
+
+  // Interaction with run-time control flow: the branch is chosen while
+  // assembling, and what is left is an ordinary if.
+  $R0 = 5;
+  if ($R0 > 0)
+  {
+    #if Version >= 3
+      DetailPrint("mixed: run-time if, assemble-time body");
+    #endif
+  }
+}

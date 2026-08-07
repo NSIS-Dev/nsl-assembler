@@ -1,0 +1,2 @@
+nsL Assembler end-to-end corpus.
+This is not a real licence; it exists so LicenseData() has a file.

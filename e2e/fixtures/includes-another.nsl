@@ -1,0 +1,12 @@
+/*
+ * Included by 13-include.nsl, and itself includes another file.
+ *
+ * Note the path: #include resolves through new FileReader(path), which is
+ * relative to the assembler's working directory rather than to this file. So
+ * even from inside fixtures/, the nested include has to be written as it would
+ * be from the corpus root.
+ */
+
+#include "fixtures/included.nsl"
+
+#define NestedConstant "from the file that included another"

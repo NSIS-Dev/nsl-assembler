@@ -1,0 +1,90 @@
+/*
+ * Global variables and variable scope.
+ *
+ * An assignment made outside any function or section is a global initialiser.
+ * The assembler collects those and emits them at the top of .onInit - or of
+ * un.onInit for the uninstaller's own list - which is why this file is worth
+ * having alongside guard.nsl: the guard defines both callbacks, so the
+ * initialisers have to be threaded into a body that already exists rather than
+ * into a synthesised one.
+ */
+
+#include "guard.nsl"
+
+Name("09 globals and scope");
+OutFile("09-globals-and-scope.exe");
+
+// Installer globals. These land at the top of .onInit, ahead of the guard call.
+$globalString = "set before anything runs";
+$globalInt = 40 + 2;
+$globalFromConstant = $WINDIR;
+$globalComputed = $globalInt * 2;
+
+// The uninstaller keeps its own list; these land in un.onInit.
+uninstall
+{
+  $uninstallGlobal = "uninstaller side";
+  $uninstallInt = 7;
+}
+
+function ReadsAGlobal()
+{
+  // Globals are visible everywhere without being redeclared.
+  DetailPrint("function sees: ".$globalString);
+  return $globalInt;
+}
+
+section Test("globals and scope")
+{
+  DetailPrint("global string   = ".$globalString);
+  DetailPrint("global int      = ".$globalInt);
+  DetailPrint("global constant = ".$globalFromConstant);
+  DetailPrint("global computed = ".$globalComputed);
+
+  $R0 = ReadsAGlobal();
+  DetailPrint("from a function = ".$R0);
+
+  // A global can be reassigned at run time like any other variable.
+  $globalInt += 1;
+  DetailPrint("global int      = ".$globalInt);
+
+  /*
+   * Scope. A block introduces a new one, and a name first assigned inside a
+   * block does not survive it - using $inner after the closing brace is an
+   * assemble-time error, not a run-time surprise.
+   */
+  {
+    $inner = "inner";
+    DetailPrint("block: ".$inner);
+
+    {
+      $deeper = "deeper";
+      DetailPrint("block: ".$inner." then ".$deeper);
+    }
+  }
+
+  // The pool registers behave the same way, so this is a fresh assignment.
+  {
+    $R1 = "block local pool register";
+    DetailPrint($R1);
+  }
+
+  // Loop and function bodies are scopes too.
+  for ($i = 0; $i < 2; $i++)
+  {
+    $loopLocal = "iteration ".$i;
+    DetailPrint($loopLocal);
+  }
+
+  if (true)
+  {
+    $ifLocal = "inside an if";
+    DetailPrint($ifLocal);
+  }
+}
+
+uninstall section Uninstall("Uninstall")
+{
+  DetailPrint("un global string = ".$uninstallGlobal);
+  DetailPrint("un global int    = ".$uninstallInt);
+}
