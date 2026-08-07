@@ -132,9 +132,11 @@ public class ScriptParser {
 						new ProcessBuilder(makensisw.getAbsolutePath(), outputFile.getCanonicalPath()).start();
 					} else {
 						stderr.println("Unable to compile \"" + outputFile.getCanonicalPath() + "\":");
+						// getAbsoluteFile() first: getParent() is null for a bare filename,
+						// which is what "..\makensisw.exe" is on a non-Windows filesystem.
 						stderr.println(
 								"  \"makensisw.exe\" not found in \""
-										+ (new File(makensisw.getParent())).getCanonicalPath()
+										+ makensisw.getAbsoluteFile().getParentFile().getCanonicalPath()
 										+ "\".");
 						if (!noPauseOnError) System.in.read();
 					}
