@@ -49,12 +49,14 @@ public class ScriptParser {
 			try {
 				statement = StatementList.match();
 			} catch (NslException ex) {
+				exitCode = 1;
 				if (ex.getInner() != null) stderr.println(ex.getInner().toString());
 				else stderr.println(ex.getMessage());
 				if (!noPauseOnError) System.in.read();
 			}
 			tokenizer.getReader().close();
 		} catch (IOException ex) {
+			exitCode = 1;
 			stderr.println(ex);
 			if (!noPauseOnError) System.in.read();
 		}
