@@ -40,6 +40,11 @@ public class SetPluginUnloadInstruction extends AssembleExpression {
 		if (!ExpressionType.isString(this.value))
 			throw new NslArgumentException(name, 1, ExpressionType.String);
 
+		// TODO: the only deprecated command nsL wraps. Lift into a general deprecation
+		// warning, with a way to silence it, if a second one ever turns up.
+		NslException.printWarning(
+				name + " is deprecated. A plug-in is expected to handle its own unloading");
+
 		String mode = this.value.getStringValue();
 		if (!isValidValue(mode))
 			throw new NslException(
