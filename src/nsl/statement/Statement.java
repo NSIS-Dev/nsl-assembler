@@ -268,6 +268,8 @@ public abstract class Statement {
 			return new ManifestAppendCustomStringInstruction(returns);
 		if (ScriptParser.tokenizer.match(ManifestDPIAwareInstruction.name))
 			return new ManifestDPIAwareInstruction(returns);
+		if (ScriptParser.tokenizer.match(ManifestDPIAwarenessInstruction.name))
+			return new ManifestDPIAwarenessInstruction(returns);
 		if (ScriptParser.tokenizer.match(ManifestDisableWindowFilteringInstruction.name))
 			return new ManifestDisableWindowFilteringInstruction(returns);
 		if (ScriptParser.tokenizer.match(ManifestGdiScalingInstruction.name))

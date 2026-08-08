@@ -39,6 +39,10 @@ BGFont("Tahoma", 40, 700, true, false, false);
 
 // Application manifest.
 ManifestDPIAware(true);
+// A distinct command from ManifestDPIAware, not a longer spelling of it. NSIS
+// wants one comma separated string; nsL also takes one value per parameter,
+// since the list is a sequence of fallbacks.
+ManifestDPIAwareness("PerMonitorV2", "system");
 ManifestGdiScaling(true);
 ManifestLongPathAware(true);
 ManifestDisableWindowFiltering(true);
