@@ -79,6 +79,18 @@ section Test("operators")
   $1 = StrCmpS($R2, "text");
   DetailPrint($0." ".$1);
 
+  // A bare == against a string literal that is not a number compares as a
+  // string, since IntCmp would read "Text" as 0 and always match. A literal
+  // that does look like a number keeps comparing numerically, and an explicit
+  // suffix always wins over both.
+  $0 = $R2 == "Text";
+  $1 = $R2 != "other";
+  $R3 = 42;
+  $2 = $R3 == "42";
+  $3 = $R3 == "0x2A";
+  $4 = $R2 ==u "Text";
+  DetailPrint($0." ".$1." ".$2." ".$3." ".$4);
+
   // --- Boolean ---
   DetailPrint("fold && = ".(true && false));
   DetailPrint("fold || = ".(true || false));

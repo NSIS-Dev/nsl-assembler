@@ -391,7 +391,48 @@ public class Expression {
 			comparisonType = ComparisonType.String;
 		}
 
+		// One side is a string literal that cannot be read as a number, and no
+		// comparison type was given. IntCmp would be emitted, and NSIS reads a
+		// non-numeric operand as 0, so the comparison silently means something else
+		// than it says. Compare as strings instead. An explicit "u", "s" or "S"
+		// suffix is always left alone, and a numeric-looking literal such as "42"
+		// keeps comparing numerically.
+		if (comparisonType.equals(ComparisonType.Integer)
+				&& (isNonNumericString(left) || isNonNumericString(right)))
+			comparisonType = ComparisonType.String;
+
 		return new ComparisonExpression(left, operator, right, comparisonType);
+	}
+
+	/**
+	 * Returns <code>true</code> if the given expression is a string literal that NSIS would not read
+	 * as a number.
+	 *
+	 * @param expression the expression
+	 * @return <code>true</code> if the expression is a non-numeric string literal
+	 */
+	private static boolean isNonNumericString(Expression expression) {
+		if (!ExpressionType.isString(expression)) return false;
+
+		// A special string interpolates variables, so its value is not known here.
+		if (expression.type.equals(ExpressionType.StringSpecial)) return true;
+
+		String value = expression.stringValue;
+		if (value == null || value.isEmpty()) return true;
+
+		int i = (value.charAt(0) == '-' || value.charAt(0) == '+') ? 1 : 0;
+		int radix = 10;
+		if (i + 1 < value.length()
+				&& value.charAt(i) == '0'
+				&& (value.charAt(i + 1) == 'x' || value.charAt(i + 1) == 'X')) {
+			radix = 16;
+			i += 2;
+		}
+		if (i == value.length()) return true;
+
+		for (; i < value.length(); i++) if (Character.digit(value.charAt(i), radix) < 0) return true;
+
+		return false;
 	}
 
 	/**
