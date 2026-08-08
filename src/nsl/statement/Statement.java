@@ -287,6 +287,8 @@ public abstract class Statement {
 		if (ScriptParser.tokenizer.match(NameInstruction.name)) return new NameInstruction(returns);
 		if (ScriptParser.tokenizer.match(PEAddResourceInstruction.name))
 			return new PEAddResourceInstruction(returns);
+		if (ScriptParser.tokenizer.match(PEDllCharacteristicsInstruction.name))
+			return new PEDllCharacteristicsInstruction(returns);
 		if (ScriptParser.tokenizer.match(PERemoveResourceInstruction.name))
 			return new PERemoveResourceInstruction(returns);
 		if (ScriptParser.tokenizer.match(PopInstruction.name)) return new PopInstruction(returns);
