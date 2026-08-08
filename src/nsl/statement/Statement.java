@@ -378,6 +378,8 @@ public abstract class Statement {
 			return new SetOverwriteInstruction(returns);
 		if (ScriptParser.tokenizer.match(SetOutPathInstruction.name))
 			return new SetOutPathInstruction(returns);
+		if (ScriptParser.tokenizer.match(SetPluginUnloadInstruction.name))
+			return new SetPluginUnloadInstruction(returns);
 		if (ScriptParser.tokenizer.match(SetRebootFlagInstruction.name))
 			return new SetRebootFlagInstruction(returns);
 		if (ScriptParser.tokenizer.match(SetRegViewInstruction.name))

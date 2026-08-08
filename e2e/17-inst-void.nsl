@@ -54,6 +54,11 @@ section Test("void instructions")
   // The plugins directory, needed before any plugin call.
   InitPluginsDir();
 
+  // Plugin unload policy. makensis calls this deprecated - a plugin is meant to
+  // manage its own unloading - but still compiles both modes.
+  SetPluginUnload("alwaysoff");
+  SetPluginUnload("manual");
+
   // The stack.
   Push("pushed");
   $R0 = Pop();
