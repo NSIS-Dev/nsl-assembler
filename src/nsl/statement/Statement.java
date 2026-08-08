@@ -218,6 +218,8 @@ public abstract class Statement {
 			return new IfRebootFlagInstruction(returns);
 		if (ScriptParser.tokenizer.match(IfRtlLanguageInstruction.name))
 			return new IfRtlLanguageInstruction(returns);
+		if (ScriptParser.tokenizer.match(IfShellVarContextAllInstruction.name))
+			return new IfShellVarContextAllInstruction(returns);
 		if (ScriptParser.tokenizer.match(IfSilentInstruction.name))
 			return new IfSilentInstruction(returns);
 		if (ScriptParser.tokenizer.match(InitPluginsDirInstruction.name))

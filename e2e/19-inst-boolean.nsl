@@ -53,6 +53,13 @@ section Test("boolean instructions")
   if (RtlLanguage())
     DetailPrint("bool: right-to-left language");
 
+  // Toggled the same way, so the true arm is not dead under the default
+  // per-user context.
+  SetShellVarContext("all");
+  if (ShellVarContextAll())
+    DetailPrint("bool: all-users shell var context");
+  SetShellVarContext("current");
+
   // --- Negated ---
 
   if (!Errors())
@@ -67,7 +74,8 @@ section Test("boolean instructions")
   $R4 = IsWindow($HWNDPARENT);
   $R7 = AltRegView();
   $R8 = RtlLanguage();
-  DetailPrint("bool: ".$R0." ".$R1." ".$R2." ".$R3." ".$R4." ".$R7." ".$R8);
+  $R9 = ShellVarContextAll();
+  DetailPrint("bool: ".$R0." ".$R1." ".$R2." ".$R3." ".$R4." ".$R7." ".$R8." ".$R9);
 
   // --- In compound conditions, where the jumps have to be threaded together ---
 
@@ -85,6 +93,9 @@ section Test("boolean instructions")
 
   if (!RtlLanguage() || Silent())
     DetailPrint("bool: negated RtlLanguage");
+
+  if (!ShellVarContextAll() && !Silent())
+    DetailPrint("bool: negated ShellVarContextAll");
 
   // --- Compared against a literal ---
 
