@@ -66,6 +66,16 @@ section Test("returning instructions")
   DetailPrint("returns: ".$0." ".$1." ".$2." ".$3." ".$4);
   DetailPrint("returns: ".$5." ".$6." ".$7." ".$8." ".$9);
 
+  // Pointer-sized arithmetic. The operator has to be a literal because it
+  // decides the arity: "~" and "!" take one operand, every other operator takes
+  // two. nsL's own + - * etc. always compile to IntOp, so this is the only
+  // spelling for the pointer-width form.
+  $R0 = IntPtrOp(8, "+", 2);
+  $R1 = IntPtrOp($R0, ">>>", 1);
+  $R2 = IntPtrOp($R0, "~");
+  $R3 = IntPtrOp($R0, "!");
+  DetailPrint("intptr: ".$R0." ".$R1." ".$R2." ".$R3);
+
   // Windows and controls.
   $R0 = FindWindow("#32770", "");
   $R1 = GetDlgItem($HWNDPARENT, 1);

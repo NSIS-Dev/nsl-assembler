@@ -241,6 +241,8 @@ public abstract class Statement {
 		if (ScriptParser.tokenizer.match(InstTypeSetTextInstruction.name))
 			return new InstTypeSetTextInstruction(returns);
 		if (ScriptParser.tokenizer.match(IntFmtInstruction.name)) return new IntFmtInstruction(returns);
+		if (ScriptParser.tokenizer.match(IntPtrOpInstruction.name))
+			return new IntPtrOpInstruction(returns);
 		if (ScriptParser.tokenizer.match(IsWindowInstruction.name))
 			return new IsWindowInstruction(returns);
 		if (ScriptParser.tokenizer.match(LangStringInstruction.name))
