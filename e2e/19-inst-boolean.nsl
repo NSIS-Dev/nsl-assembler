@@ -48,6 +48,11 @@ section Test("boolean instructions")
     DetailPrint("bool: alternate registry view");
   SetRegView("default");
 
+  // Whether the current language reads right to left. Depends on the language
+  // selected at runtime, so both arms have to be reachable.
+  if (RtlLanguage())
+    DetailPrint("bool: right-to-left language");
+
   // --- Negated ---
 
   if (!Errors())
@@ -61,7 +66,8 @@ section Test("boolean instructions")
   $R3 = RebootFlag();
   $R4 = IsWindow($HWNDPARENT);
   $R7 = AltRegView();
-  DetailPrint("bool: ".$R0." ".$R1." ".$R2." ".$R3." ".$R4." ".$R7);
+  $R8 = RtlLanguage();
+  DetailPrint("bool: ".$R0." ".$R1." ".$R2." ".$R3." ".$R4." ".$R7." ".$R8);
 
   // --- In compound conditions, where the jumps have to be threaded together ---
 
@@ -76,6 +82,9 @@ section Test("boolean instructions")
 
   if (!AltRegView() && !Errors())
     DetailPrint("bool: negated AltRegView");
+
+  if (!RtlLanguage() || Silent())
+    DetailPrint("bool: negated RtlLanguage");
 
   // --- Compared against a literal ---
 
