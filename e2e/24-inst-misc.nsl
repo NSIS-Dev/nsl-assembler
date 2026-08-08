@@ -55,6 +55,11 @@ ManifestMaxVersionTested("10.0.22621.0");
  * two-argument spelling of it with its own usage line, including one written
  * by hand in a bare .nsi, so this is an NSIS-side limitation rather than
  * anything nsL does.
+ *
+ * PEAddResource and PERemoveResource are not covered for the same reason: this
+ * makensis rejects every spelling of both, including the one it prints itself.
+ * PESubsysVer and PEDllCharacteristics compile on the same build, so it is
+ * these two commands rather than the PE family.
  */
 
 page License();

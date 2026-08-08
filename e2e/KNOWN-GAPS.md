@@ -184,4 +184,5 @@ These are excluded for reasons that have nothing to do with the assembler.
 | `GetDLLVersionLocal` | Reads the file while compiling, so needs a real DLL. [18-inst-returns.nsl](18-inst-returns.nsl) covers the run-time `GetDLLVersion` |
 | `LogSet`, `LogText` | Rejected outright unless NSIS was built with `NSIS_CONFIG_LOG` |
 | `ManifestAppendCustomString` | `makensis` 3.12 rejects every two-argument spelling, including one written by hand in a bare `.nsi` |
+| `PEAddResource`, `PERemoveResource` | `makensis` 3.12 rejects every spelling of both, including the one its own usage line prints. `PESubsysVer` and `PEDllCharacteristics` compile on the same build, so this is these two commands rather than the PE family |
 | Plug-in calls | Need actual plug-in DLLs present at compile time |
