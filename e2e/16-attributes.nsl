@@ -68,6 +68,10 @@ SetFont("Tahoma", 8, 1033);
 // Version information. VIProductVersion has to come first, and the four keys
 // NSIS calls standard have to be present or it warns about each missing one.
 VIProductVersion("1.0.0.0");
+// makensis only counts the dots here: each field goes through atoi, so a fifth
+// field or a trailing word passes it and lands in the resource as a number
+// nobody wrote. The four-field check is the assembler's.
+VIFileVersion("1.0.0.0");
 VIAddVersionKey("ProductName", "nsL corpus");
 VIAddVersionKey("FileVersion", "1.0.0.0");
 VIAddVersionKey("FileDescription", "attributes corpus build");

@@ -291,6 +291,8 @@ public abstract class Statement {
 			return new PEDllCharacteristicsInstruction(returns);
 		if (ScriptParser.tokenizer.match(PERemoveResourceInstruction.name))
 			return new PERemoveResourceInstruction(returns);
+		if (ScriptParser.tokenizer.match(PESubsysVerInstruction.name))
+			return new PESubsysVerInstruction(returns);
 		if (ScriptParser.tokenizer.match(PopInstruction.name)) return new PopInstruction(returns);
 		if (ScriptParser.tokenizer.match(PushInstruction.name)) return new PushInstruction(returns);
 		if (ScriptParser.tokenizer.match(OutFileInstruction.name))
@@ -419,6 +421,8 @@ public abstract class Statement {
 			return new UnsafeStrCpyInstruction(returns);
 		if (ScriptParser.tokenizer.match(VIAddVersionKeyInstruction.name))
 			return new VIAddVersionKeyInstruction(returns);
+		if (ScriptParser.tokenizer.match(VIFileVersionInstruction.name))
+			return new VIFileVersionInstruction(returns);
 		if (ScriptParser.tokenizer.match(VIProductVersionInstruction.name))
 			return new VIProductVersionInstruction(returns);
 		if (ScriptParser.tokenizer.match(WindowIconInstruction.name))
