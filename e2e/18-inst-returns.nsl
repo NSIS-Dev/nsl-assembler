@@ -66,6 +66,10 @@ section Test("returning instructions")
   DetailPrint("returns: ".$0." ".$1." ".$2." ".$3." ".$4);
   DetailPrint("returns: ".$5." ".$6." ".$7." ".$8." ".$9);
 
+  // Int64Fmt has the same shape - $0 = Int64Fmt("%I64u", "4294967296") - but
+  // makensis only accepts it under a 64-bit target, and this build ships x86
+  // stubs only. See KNOWN-GAPS.md.
+
   // Pointer-sized arithmetic. The operator has to be a literal because it
   // decides the arity: "~" and "!" take one operand, every other operator takes
   // two. nsL's own + - * etc. always compile to IntOp, so this is the only

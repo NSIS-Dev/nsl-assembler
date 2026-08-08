@@ -240,6 +240,8 @@ public abstract class Statement {
 			return new InstTypeInstruction(returns);
 		if (ScriptParser.tokenizer.match(InstTypeSetTextInstruction.name))
 			return new InstTypeSetTextInstruction(returns);
+		if (ScriptParser.tokenizer.match(Int64FmtInstruction.name))
+			return new Int64FmtInstruction(returns);
 		if (ScriptParser.tokenizer.match(IntFmtInstruction.name)) return new IntFmtInstruction(returns);
 		if (ScriptParser.tokenizer.match(IntPtrOpInstruction.name))
 			return new IntPtrOpInstruction(returns);
