@@ -41,6 +41,13 @@ section Test("boolean instructions")
   if (AbortCalled())
     DetailPrint("bool: AbortCalled");
 
+  // Whether SetRegView put the registry into the non-native view. Toggled here
+  // so both arms are reachable rather than folded away by the 32/64 default.
+  SetRegView("64");
+  if (AltRegView())
+    DetailPrint("bool: alternate registry view");
+  SetRegView("default");
+
   // --- Negated ---
 
   if (!Errors())
@@ -53,7 +60,8 @@ section Test("boolean instructions")
   $R2 = Silent();
   $R3 = RebootFlag();
   $R4 = IsWindow($HWNDPARENT);
-  DetailPrint("bool: ".$R0." ".$R1." ".$R2." ".$R3." ".$R4);
+  $R7 = AltRegView();
+  DetailPrint("bool: ".$R0." ".$R1." ".$R2." ".$R3." ".$R4." ".$R7);
 
   // --- In compound conditions, where the jumps have to be threaded together ---
 
@@ -65,6 +73,9 @@ section Test("boolean instructions")
 
   if ((Silent() || RebootFlag()) && FileExists($EXEDIR) && !Errors())
     DetailPrint("bool: nested");
+
+  if (!AltRegView() && !Errors())
+    DetailPrint("bool: negated AltRegView");
 
   // --- Compared against a literal ---
 

@@ -208,6 +208,8 @@ public abstract class Statement {
 		if (ScriptParser.tokenizer.match(IconInstruction.name)) return new IconInstruction(returns);
 		if (ScriptParser.tokenizer.match(IfAbortInstruction.name))
 			return new IfAbortInstruction(returns);
+		if (ScriptParser.tokenizer.match(IfAltRegViewInstruction.name))
+			return new IfAltRegViewInstruction(returns);
 		if (ScriptParser.tokenizer.match(IfErrorsInstruction.name))
 			return new IfErrorsInstruction(returns);
 		if (ScriptParser.tokenizer.match(IfFileExistsInstruction.name))
