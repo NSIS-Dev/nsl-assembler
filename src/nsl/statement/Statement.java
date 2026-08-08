@@ -285,6 +285,7 @@ public abstract class Statement {
 		if (ScriptParser.tokenizer.match(MiscButtonTextInstruction.name))
 			return new MiscButtonTextInstruction(returns);
 		if (ScriptParser.tokenizer.match(NameInstruction.name)) return new NameInstruction(returns);
+		if (ScriptParser.tokenizer.match(NopInstruction.name)) return new NopInstruction(returns);
 		if (ScriptParser.tokenizer.match(PEAddResourceInstruction.name))
 			return new PEAddResourceInstruction(returns);
 		if (ScriptParser.tokenizer.match(PEDllCharacteristicsInstruction.name))

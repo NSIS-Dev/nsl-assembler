@@ -59,6 +59,9 @@ section Test("void instructions")
   SetPluginUnload("alwaysoff");
   SetPluginUnload("manual");
 
+  // Does nothing, so the only thing to get wrong is emitting an operand.
+  Nop();
+
   // The stack.
   Push("pushed");
   $R0 = Pop();
