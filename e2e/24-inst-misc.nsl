@@ -43,6 +43,9 @@ ManifestGdiScaling(true);
 ManifestLongPathAware(true);
 ManifestDisableWindowFiltering(true);
 ManifestSupportedOS("Win10");
+// makensis writes this straight into the manifest without checking it, so the
+// assembler is the only thing that rejects a value which is not a version.
+ManifestMaxVersionTested("10.0.22621.0");
 /*
  * ManifestAppendCustomString is not covered: makensis 3.12 rejects every
  * two-argument spelling of it with its own usage line, including one written

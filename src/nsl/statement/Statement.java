@@ -274,6 +274,8 @@ public abstract class Statement {
 			return new ManifestGdiScalingInstruction(returns);
 		if (ScriptParser.tokenizer.match(ManifestLongPathAwareInstruction.name))
 			return new ManifestLongPathAwareInstruction(returns);
+		if (ScriptParser.tokenizer.match(ManifestMaxVersionTestedInstruction.name))
+			return new ManifestMaxVersionTestedInstruction(returns);
 		if (ScriptParser.tokenizer.match(ManifestSupportedOSInstruction.name))
 			return new ManifestSupportedOSInstruction(returns);
 		if (ScriptParser.tokenizer.match(MessageBoxInstruction.name))
