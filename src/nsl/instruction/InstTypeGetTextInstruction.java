@@ -52,7 +52,7 @@ public class InstTypeGetTextInstruction extends AssembleExpression {
 	@Override
 	public void assemble(Register var) throws IOException {
 		Expression varOrInstType = AssembleExpression.getRegisterOrExpression(this.instType);
-		ScriptParser.writeLine(name + " " + var + " " + varOrInstType);
+		ScriptParser.writeLine(name + " " + varOrInstType + " " + var);
 		varOrInstType.setInUse(false);
 	}
 }

@@ -41,7 +41,7 @@ public class VIAddVersionKeyInstruction extends AssembleExpression {
 		if (!ExpressionType.isString(this.value))
 			throw new NslArgumentException(name, 2, ExpressionType.String);
 
-		if (paramsCount > 1) {
+		if (paramsCount > 2) {
 			this.langId = paramsList.get(2);
 			if (!ExpressionType.isInteger(this.langId))
 				throw new NslArgumentException(name, 3, ExpressionType.Integer);
@@ -53,14 +53,16 @@ public class VIAddVersionKeyInstruction extends AssembleExpression {
 	/** Assembles the source code. */
 	@Override
 	public void assemble() throws IOException {
-		AssembleExpression.assembleIfRequired(this.keyName);
-		AssembleExpression.assembleIfRequired(this.value);
-		String write = name + " " + this.keyName + " " + this.value;
+		String write = name;
 
 		if (this.langId != null) {
 			AssembleExpression.assembleIfRequired(this.langId);
-			write += " " + this.langId;
+			write += " /LANG=" + this.langId;
 		}
+
+		AssembleExpression.assembleIfRequired(this.keyName);
+		AssembleExpression.assembleIfRequired(this.value);
+		write += " " + this.keyName + " " + this.value;
 
 		ScriptParser.writeLine(write);
 	}

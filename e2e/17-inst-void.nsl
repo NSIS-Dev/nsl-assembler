@@ -1,0 +1,79 @@
+/*
+ * Instructions that take arguments and return nothing.
+ *
+ * Grouped by shape rather than by subject, because the bugs these catch are
+ * about arity and operand order, and those do not respect subject boundaries.
+ * The registry, filesystem and UI families get their own files.
+ */
+
+#include "guard.nsl"
+
+Name("17 inst void");
+OutFile("17-inst-void.exe");
+
+section Test("void instructions")
+{
+  // Detail window.
+  DetailPrint("void: DetailPrint");
+  SetDetailsPrint("both");
+  SetDetailsView("show");
+  SetAutoClose("false");
+
+  // The error flag.
+  ClearErrors();
+  SetErrors();
+  ClearErrors();
+
+  // Error level returned by the installer process.
+  SetErrorLevel(0);
+
+  // Reboot flag.
+  SetRebootFlag(false);
+
+  // Silent flag.
+  SetSilent("normal");
+
+  // Which of $SMPROGRAMS, $DESKTOP etc. resolve per-user or per-machine.
+  SetShellVarContext("current");
+  SetShellVarContext("all");
+  SetShellVarContext("current");
+
+  // Registry view on 64-bit Windows.
+  SetRegView("32");
+  SetRegView("64");
+  SetRegView("default");
+
+  // Overwrite policy for File(), scoped to the rest of the section.
+  SetOverwrite("try");
+  SetOverwrite("on");
+
+  // Compression, which is legal inside a section as well as globally.
+  SetCompress("off");
+  SetCompress("auto");
+
+  // The plugins directory, needed before any plugin call.
+  InitPluginsDir();
+
+  // The stack.
+  Push("pushed");
+  $R0 = Pop();
+  DetailPrint("void: popped ".$R0);
+
+  // Install type selection.
+  SetCurInstType(0);
+
+  /*
+   * Not covered: LogSet and LogText. Both need an NSIS built with
+   * NSIS_CONFIG_LOG, which the stock build is not, and makensis rejects the
+   * script outright rather than warning - so covering them would mean the whole
+   * corpus only runs against a special build.
+   */
+
+  /*
+   * Not covered: Sleep, Exch, ChangeUI, Call, GetCurrentAddress,
+   * GetFunctionAddress and GetLabelAddress. All seven have wrapper classes in
+   * nsl/instruction/ that are never referenced from
+   * Statement.matchInstruction(), so using any of them fails with
+   * "Function ... not found". See KNOWN-GAPS.md.
+   */
+}

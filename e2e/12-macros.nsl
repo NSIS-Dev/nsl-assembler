@@ -1,0 +1,131 @@
+/*
+ * #macro: parameters, return values, overloading, recursion, and the Returns
+ * constant.
+ *
+ * Macros are inserted rather than called, so everything here happens while
+ * assembling. Recursion combined with #if is how nsL expresses an
+ * assemble-time loop, and eval() is how a macro builds nsL source to insert.
+ */
+
+#include "guard.nsl"
+
+Name("12 macros");
+OutFile("12-macros.exe");
+
+section Test("macros")
+{
+  // --- No parameters, no return value ---
+  #macro Simple()
+    DetailPrint("macro: simple");
+  #macroend
+
+  Simple();
+
+  // --- Parameters ---
+  #macro WithArgs(First, Second)
+    DetailPrint("macro: args ".First." and ".Second);
+    // The same thing through format(), which substitutes the macro arguments at
+    // assemble time just as concatenation does.
+    DetailPrint(format("macro: args {0} and {1}", First, Second));
+  #macroend
+
+  WithArgs("one", 2);
+
+  // --- A single return value, usable in an expression ---
+  #macro ReturnsOne()
+    #return 41 + 1
+  #macroend
+
+  $R0 = ReturnsOne();
+  DetailPrint("macro: returns one = ".$R0);
+  DetailPrint("macro: in an expression = ".(ReturnsOne() + 1));
+
+  // --- Several return values ---
+  #macro ReturnsThree()
+    #return (1, 2, 3)
+  #macroend
+
+  ($R0, $R1, $R2) = ReturnsThree();
+  DetailPrint("macro: returns three = ".$R0." ".$R1." ".$R2);
+
+  // --- Overloaded on parameter count ---
+  #macro Overloaded(A)
+    #return A
+  #macroend
+
+  #macro Overloaded(A, B)
+    #return A + B
+  #macroend
+
+  DetailPrint("macro: overloads = ".Overloaded(1)." ".Overloaded(1, 2));
+
+  // --- A return value that is itself a jump, used as a condition ---
+  #macro IsSilent()
+    #return Silent() == true
+  #macroend
+
+  if (IsSilent())
+    DetailPrint("macro: silent");
+  else
+    DetailPrint("macro: not silent");
+
+  // --- Recursion as an assemble-time loop ---
+  #macro Repeat(From, To, Insert, Arg)
+    #if (From <= To)
+      eval(Insert.'(From, Arg)');
+      Repeat(From + 1, To, Insert, Arg);
+    #endif
+  #macroend
+
+  #macro Body(Count, Arg)
+    DetailPrint('macro: iteration '.Count.' of '.Arg);
+  #macroend
+
+  Repeat(1, 4, 'Body', 'four');
+
+  /*
+   * --- Returns ---
+   *
+   * Returns holds how many values the current insertion is being asked for, so
+   * one macro can serve every arity. ZeroAll builds a return list of the right
+   * length by recursing on it.
+   */
+  #macro ZeroAll()
+    #return (eval(BuildZeroes(Returns)))
+  #macroend
+
+  #macro BuildZeroes(Count)
+    #if (Count > 1)
+      #return '0, '.BuildZeroes(Count - 1)
+    #else
+      #return '0'
+    #endif
+  #macroend
+
+  $R0 = ZeroAll();
+  ($R1, $R2, $R3) = ZeroAll();
+  DetailPrint("macro: zeroed = ".$R0." ".$R1." ".$R2." ".$R3);
+
+  // --- returnvar() inside a macro ---
+  // returnvar(1) has to be the whole argument; concatenating it into a larger
+  // expression reports "no return registers are being used".
+  #macro EchoTarget()
+    DetailPrint(returnvar(1));
+    #return returnvar(1)
+  #macroend
+
+  $R4 = 9;
+  $R4 = EchoTarget();
+  DetailPrint("macro: target unchanged = ".$R4);
+
+  // --- #error, guarding an insertion that asks for the wrong arity ---
+  #macro MustReturnOne()
+    #if (Returns != 1)
+      #error "MustReturnOne returns exactly one value"
+    #endif
+    #return true
+  #macroend
+
+  $R0 = MustReturnOne();
+  DetailPrint("macro: arity guard = ".$R0);
+}

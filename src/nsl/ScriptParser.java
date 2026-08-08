@@ -32,7 +32,7 @@ public class ScriptParser {
 	 *
 	 * @param path the script file path
 	 * @param noPauseOnError do not pause on error
-	 * @param noMakeNSIS do not run makensisw.exe
+	 * @param noMakeNSIS do not run the NSIS compiler
 	 * @return the exit code
 	 */
 	public static int parse(String path, boolean noPauseOnError, boolean noMakeNSIS)
@@ -49,12 +49,14 @@ public class ScriptParser {
 			try {
 				statement = StatementList.match();
 			} catch (NslException ex) {
+				exitCode = 1;
 				if (ex.getInner() != null) stderr.println(ex.getInner().toString());
 				else stderr.println(ex.getMessage());
 				if (!noPauseOnError) System.in.read();
 			}
 			tokenizer.getReader().close();
 		} catch (IOException ex) {
+			exitCode = 1;
 			stderr.println(ex);
 			if (!noPauseOnError) System.in.read();
 		}
@@ -97,8 +99,11 @@ public class ScriptParser {
 				if (writer != null) {
 					try {
 						writer.close();
-					} finally {
+					} catch (IOException closeEx) {
+						// Ignored: a failure is already being reported below and the
+						// partial output file is deleted regardless.
 					}
+					writer = null;
 					outputFile.delete();
 				}
 
@@ -119,23 +124,7 @@ public class ScriptParser {
 
 				// Build the NSIS script.
 				if (!noMakeNSIS) {
-					File makensisw = new File("..\\makensisw.exe");
-					if (makensisw.exists()) {
-						Runtime.getRuntime()
-								.exec(
-										"\""
-												+ makensisw.getAbsolutePath()
-												+ "\" \""
-												+ outputFile.getCanonicalPath()
-												+ "\"");
-					} else {
-						stderr.println("Unable to compile \"" + outputFile.getCanonicalPath() + "\":");
-						stderr.println(
-								"  \"makensisw.exe\" not found in \""
-										+ (new File(makensisw.getParent())).getCanonicalPath()
-										+ "\".");
-						if (!noPauseOnError) System.in.read();
-					}
+					exitCode = NsisCompiler.compile(outputFile, noPauseOnError, stdout, stderr);
 				}
 			}
 		}

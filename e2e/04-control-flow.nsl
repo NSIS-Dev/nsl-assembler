@@ -1,0 +1,165 @@
+/*
+ * if / while / do / for, with break and continue.
+ *
+ * Each construct appears three ways: with a condition the assembler can fold,
+ * with one it cannot, and nested inside another construct. The folded forms
+ * matter because the assembler omits unreachable branches entirely, and an
+ * omission that takes a label with it produces NSIS that will not compile.
+ */
+
+#include "guard.nsl"
+
+Name("04 control flow");
+OutFile("04-control-flow.exe");
+
+section Test("control flow")
+{
+  $R0 = 5;
+
+  // --- if ---
+  if ($R0 > 0)
+    DetailPrint("if: single statement");
+
+  if ($R0 > 0)
+  {
+    DetailPrint("if: block");
+  }
+
+  if ($R0 > 9)
+    DetailPrint("if: not this");
+  else
+    DetailPrint("if: else");
+
+  if ($R0 == 0)
+    DetailPrint("if: no");
+  else if ($R0 == 5)
+    DetailPrint("if: else if");
+  else if ($R0 == 6)
+    DetailPrint("if: no");
+  else
+    DetailPrint("if: no");
+
+  // Conditions the assembler resolves on its own: the dead arm is not emitted.
+  if (true)
+    DetailPrint("if: folded true");
+  if (false)
+    DetailPrint("if: folded false, never emitted");
+  else
+    DetailPrint("if: folded false, else emitted");
+
+  // Nested.
+  if ($R0 > 0)
+  {
+    if ($R0 > 4)
+    {
+      if ($R0 < 6)
+        DetailPrint("if: three deep");
+    }
+  }
+
+  // --- while ---
+  $R1 = 0;
+  while ($R1 < 3)
+  {
+    DetailPrint("while: ".$R1);
+    $R1++;
+  }
+
+  // Never entered, but still emitted - the body may hold a continue that needs
+  // the loop's label.
+  while ($R1 < 3 && false)
+  {
+    DetailPrint("while: unreachable");
+    $R1++;
+  }
+
+  // --- do / while ---
+  $R1 = 0;
+  do
+  {
+    DetailPrint("do: ".$R1);
+    $R1++;
+  }
+  while ($R1 < 3);
+
+  // Runs exactly once, and leaves a label with nothing jumping to it. The
+  // assembler emits a zero-jump StrCmp to keep makensis from warning.
+  do
+  {
+    DetailPrint("do: once");
+  }
+  while (false);
+
+  // --- for ---
+  for ($i = 0; $i < 3; $i++)
+    DetailPrint("for: ".$i);
+
+  // Multiple initialisers and multiple iterators.
+  for ($i = 0, $j = 3; $i < 3 && $j > 0; $i++, $j--)
+    DetailPrint("for: ".$i." ".$j);
+
+  // Every clause is optional.
+  $m = 3;
+  for (; $m > 0;)
+  {
+    DetailPrint("for: no init or iterator, ".$m);
+    $m--;
+  }
+
+  $m = 3;
+  for (;;)
+  {
+    DetailPrint("for: bare, ".$m);
+    if ($m == 0)
+      break;
+    $m--;
+  }
+
+  /*
+   * Never assembled. Reuses $i rather than introducing a name of its own: a
+   * variable that appears only in unassembled code is still declared, and
+   * makensis warns that it wastes memory. Examples/Loops.nsl notes the same.
+   */
+  for ($i = 0; true && false; $i++)
+    DetailPrint("for: unreachable");
+
+  // --- break and continue ---
+  for ($i = 0; $i < 10; $i++)
+  {
+    if ($i == 2)
+      continue;
+    if ($i == 5)
+      break;
+    DetailPrint("break/continue: ".$i);
+  }
+
+  // break and continue bind to the innermost loop.
+  for ($i = 0; $i < 3; $i++)
+  {
+    $j = 0;
+    while ($j < 3)
+    {
+      $j++;
+      if ($j == 2)
+        continue;
+      if ($j == 3)
+        break;
+      DetailPrint("nested: ".$i." ".$j);
+    }
+  }
+
+  // A loop inside an if inside a loop.
+  for ($i = 0; $i < 2; $i++)
+  {
+    if ($i == 1)
+    {
+      $j = 0;
+      do
+      {
+        DetailPrint("mixed: ".$i." ".$j);
+        $j++;
+      }
+      while ($j < 2);
+    }
+  }
+}

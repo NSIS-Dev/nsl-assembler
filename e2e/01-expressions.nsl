@@ -1,0 +1,67 @@
+/*
+ * Literals, types and the register pool.
+ *
+ * Everything here is about what an expression can *be* - the operators that
+ * combine them are 02.
+ */
+
+#include "guard.nsl"
+
+Name("01 expressions");
+OutFile("01-expressions.exe");
+
+section Test("expressions")
+{
+  // Every literal type.
+  $R0 = 42;
+  $R1 = "a string";
+  $R2 = true;
+  $R3 = false;
+  $R4 = 0x1F;
+  $R5 = -7;
+
+  // Registers and NSIS constants as values.
+  $R6 = $R0;
+  $R7 = $INSTDIR;
+  $R8 = $WINDIR;
+  $R9 = $PROGRAMFILES;
+
+  // A named variable, which becomes a Var rather than one of the pool.
+  $namedVariable = "declared by first assignment";
+  DetailPrint($namedVariable);
+
+  // Assemble-time conversions.
+  $0 = toint("255");
+  $1 = toint("0xFF");
+  $2 = toint(true);
+  $3 = toint($R0);
+  $4 = length("twelve chars");
+  $5 = type(42);
+  $6 = type("s");
+  $7 = type(true);
+  $8 = type($R0);
+  $9 = type($WINDIR);
+
+  DetailPrint($0." ".$1." ".$2." ".$3." ".$4);
+  DetailPrint($5." ".$6." ".$7." ".$8." ".$9);
+
+  /*
+   * Register pool pressure: enough nested sub-expressions in one statement that
+   * the allocator has to hand out and release several temporaries. A leak shows
+   * up as "out of registers" at assemble time.
+   */
+  $R0 = 1;
+  $R1 = 2;
+  $R2 = 3;
+  $R3 = (($R0 + $R1) * ($R1 + $R2)) - (($R0 * $R2) + ($R1 * $R1));
+  DetailPrint("nested = ".$R3);
+
+  // Deeply nested concatenation of mixed operand types.
+  DetailPrint("int ".42." bool ".true." reg ".$R0." const ".$WINDIR." end");
+
+  // A block introduces a new scope; $blockLocal does not escape it.
+  {
+    $blockLocal = "scoped";
+    DetailPrint($blockLocal);
+  }
+}

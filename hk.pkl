@@ -1,0 +1,33 @@
+amends "package://github.com/jdx/hk/releases/download/v1.53.0/hk@1.53.0#/Config.pkl"
+
+/// Spotless owns its own file set (see the `target` in build.gradle), so the
+/// steps run the whole Gradle task rather than passing `{{files}}` through.
+/// `exclusive` keeps two Gradle invocations off the same project lock.
+local linters = new Mapping<String, Step> {
+  ["format"] {
+    glob = List("*.java")
+    exclusive = true
+    fix = "mise run format"
+  }
+  ["lint"] {
+    glob = List("*.java")
+    exclusive = true
+    check = "mise run lint"
+  }
+}
+
+hooks {
+  ["pre-commit"] {
+    fix = true
+    stage = true
+    stash = "git"
+    steps = linters
+  }
+  ["check"] {
+    steps = linters
+  }
+  ["fix"] {
+    fix = true
+    steps = linters
+  }
+}

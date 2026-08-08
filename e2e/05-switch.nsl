@@ -1,0 +1,127 @@
+/*
+ * switch, over each subject type it accepts.
+ *
+ * Fallthrough is the interesting case: a case without a break runs into the
+ * next one, which the assembler has to express in NSIS with labels rather than
+ * a jump table.
+ */
+
+#include "guard.nsl"
+
+Name("05 switch");
+OutFile("05-switch.exe");
+
+section Test("switch")
+{
+  // --- Integer subject, with fallthrough ---
+  $R0 = 1;
+  switch ($R0)
+  {
+    case 0:
+      DetailPrint("int: 0");
+    case 1:
+      DetailPrint("int: 0 or 1 (fell through)");
+      break;
+    case 2:
+      DetailPrint("int: 2");
+      break;
+    default:
+      DetailPrint("int: something else");
+      break;
+  }
+
+  // No default arm.
+  switch ($R0)
+  {
+    case 1:
+      DetailPrint("int: no default arm");
+      break;
+  }
+
+  // default must come last; the assembler rejects it anywhere else.
+  switch ($R0)
+  {
+    case 1:
+      DetailPrint("int: case before default");
+      break;
+    default:
+      DetailPrint("int: default last");
+      break;
+  }
+
+  // --- String subject ---
+  $R1 = "beta";
+  switch ($R1)
+  {
+    case "alpha":
+      DetailPrint("str: alpha");
+      break;
+    case "beta":
+      DetailPrint("str: beta");
+      break;
+    default:
+      DetailPrint("str: default");
+      break;
+  }
+
+  // --- Boolean subject ---
+  switch (Silent())
+  {
+    case true:
+      DetailPrint("bool: silent");
+      break;
+    case false:
+      DetailPrint("bool: not silent");
+      break;
+  }
+
+  // --- Subject is an expression, evaluated once ---
+  switch ($R0 + 1)
+  {
+    case 2:
+      DetailPrint("expr: subject folded to 2");
+      break;
+    default:
+      DetailPrint("expr: default");
+      break;
+  }
+
+  // --- A switch inside a loop, with break bound to the switch ---
+  for ($i = 0; $i < 3; $i++)
+  {
+    switch ($i)
+    {
+      case 0:
+        DetailPrint("loop switch: zero");
+        break;
+      case 1:
+        DetailPrint("loop switch: one");
+        break;
+      default:
+        DetailPrint("loop switch: default");
+        break;
+    }
+  }
+
+  /*
+   * Deliberately absent: any loop or nested switch inside a case. The first one
+   * that appears leaves every later break in the enclosing switch rejected with
+   * "The break statement cannot be used here", while the assembler separately
+   * insists the switch end with a break - so no arrangement of the two
+   * assembles. Put the inner construct in a function and call it instead.
+   * See KNOWN-GAPS.md.
+   */
+
+  // Several statements per case, and an empty case body.
+  $R2 = 3;
+  switch ($R2)
+  {
+    case 3:
+      $R3 = 1;
+      $R3 += 1;
+      DetailPrint("multi: ".$R3);
+      break;
+    case 4:
+      break;
+  }
+}

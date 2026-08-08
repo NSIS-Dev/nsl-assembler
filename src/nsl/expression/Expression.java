@@ -1116,35 +1116,48 @@ public class Expression {
 				throw new NslArgumentException("format", 1, ExpressionType.String);
 
 			String formatString = value.toString(true);
-			int formatStringLength = formatString.length();
-			for (int i = 0; i < formatStringLength; i++) {
-				// Two { characters escapes.
-				if (formatString.charAt(i) == '{' && formatString.charAt(++i) != '{') {
-					int paramNumberAt = i - 1;
-					String paramNumberString = "";
+			// The string is rebuilt on every substitution, so its length is read afresh
+			// each time round rather than held in a local.
+			for (int i = 0; i < formatString.length(); i++) {
+				if (formatString.charAt(i) != '{') continue;
 
-					for (; i < formatStringLength; i++) {
-						char c = formatString.charAt(i);
-						if (c == '}') break;
-						if (c < '0' || c > '9')
-							throw new NslException(
-									"Bad parameter number for \"format\" (contains non numeric characters)", true);
-						paramNumberString += c;
-					}
-
-					int paramNumber = Integer.parseInt(paramNumberString);
-					if (paramNumber < 0 || paramNumber >= paramsCount)
-						throw new NslException(
-								"Parameter number for \"format\" is out of range of given parameters", true);
-
-					// Insert the parameter.
-					String paramValue = paramsList.get(paramNumber + 1).toString(true);
-					formatString =
-							formatString.substring(0, paramNumberAt) + paramValue + formatString.substring(i + 1);
-
-					// Move the new position to after the inserted parameter.
-					i = paramNumberAt + paramValue.length();
+				// Two { characters escapes: drop the first and leave the second as text.
+				if (i + 1 < formatString.length() && formatString.charAt(i + 1) == '{') {
+					formatString = formatString.substring(0, i) + formatString.substring(i + 1);
+					continue;
 				}
+
+				int paramNumberAt = i;
+				String paramNumberString = "";
+				int end = i + 1;
+
+				for (; end < formatString.length(); end++) {
+					char c = formatString.charAt(end);
+					if (c == '}') break;
+					if (c < '0' || c > '9')
+						throw new NslException(
+								"Bad parameter number for \"format\" (contains non numeric characters)", true);
+					paramNumberString += c;
+				}
+
+				if (end == formatString.length())
+					throw new NslException("Missing \"}\" for a \"format\" parameter placeholder", true);
+				if (paramNumberString.isEmpty())
+					throw new NslException("Missing parameter number for \"format\"", true);
+
+				int paramNumber = Integer.parseInt(paramNumberString);
+				if (paramNumber < 0 || paramNumber >= paramsCount)
+					throw new NslException(
+							"Parameter number for \"format\" is out of range of given parameters", true);
+
+				// Insert the parameter.
+				String paramValue = paramsList.get(paramNumber + 1).toString(true);
+				formatString =
+						formatString.substring(0, paramNumberAt) + paramValue + formatString.substring(end + 1);
+
+				// Carry on at the character after the inserted parameter, so that the
+				// inserted text is not itself rescanned for placeholders.
+				i = paramNumberAt + paramValue.length() - 1;
 			}
 
 			return Expression.fromString(formatString);

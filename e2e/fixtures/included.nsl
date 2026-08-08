@@ -1,0 +1,13 @@
+/*
+ * Included by 13-include.nsl. Contributes a constant, a function and a global
+ * so that the including script can prove all three cross the file boundary.
+ */
+
+#define IncludedConstant "from the included file"
+
+$includedGlobal = "global set in an included file";
+
+function IncludedFunction($n)
+{
+  return $n + 1;
+}

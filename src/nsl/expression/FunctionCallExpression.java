@@ -16,6 +16,7 @@ import nsl.*;
 public class FunctionCallExpression extends MultipleReturnValueAssembleExpression {
 	private final ArrayList<Expression> params;
 	private final int lineNo;
+	private final boolean inUninstaller;
 
 	/**
 	 * Class constructor.
@@ -26,6 +27,9 @@ public class FunctionCallExpression extends MultipleReturnValueAssembleExpressio
 		this.stringValue = name;
 		this.params = Expression.matchList();
 		this.lineNo = ScriptParser.tokenizer.lineno();
+		// Recorded here rather than read in assemble(): the flag tracks where the
+		// parser is, and by the time anything is written it has long been reset.
+		this.inUninstaller = Scope.inUninstaller();
 	}
 
 	/**
@@ -38,6 +42,7 @@ public class FunctionCallExpression extends MultipleReturnValueAssembleExpressio
 		this.stringValue = name;
 		this.params = params;
 		this.lineNo = ScriptParser.tokenizer.lineno();
+		this.inUninstaller = Scope.inUninstaller();
 	}
 
 	/**
@@ -71,8 +76,16 @@ public class FunctionCallExpression extends MultipleReturnValueAssembleExpressio
 	 * @param vars the variables to assign the values to
 	 */
 	public void assemble(ArrayList<Register> vars) throws IOException {
-		FunctionInfo functionInfo =
-				FunctionInfo.find(this.stringValue, this.params.size(), vars.size());
+		// NSIS keeps installer and uninstaller functions in separate namespaces and
+		// rejects an unprefixed Call from uninstaller code, so a call made there has
+		// to resolve against the "un." prefixed name that FunctionStatement stored.
+		// Falling back to the plain name leaves the diagnostic below to report a
+		// function that genuinely does not exist.
+		FunctionInfo functionInfo = null;
+		if (this.inUninstaller)
+			functionInfo = FunctionInfo.find("un." + this.stringValue, this.params.size(), vars.size());
+		if (functionInfo == null)
+			functionInfo = FunctionInfo.find(this.stringValue, this.params.size(), vars.size());
 		if (functionInfo == null)
 			throw new NslException(
 					"Function \""

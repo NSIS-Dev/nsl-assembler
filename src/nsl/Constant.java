@@ -23,7 +23,7 @@ public class Constant {
 	 */
 	public Constant(String name, String realName, int index) {
 		this.name = name;
-		this.realName = null;
+		this.realName = realName;
 		this.index = index;
 	}
 

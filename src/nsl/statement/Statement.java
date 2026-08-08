@@ -382,11 +382,11 @@ public abstract class Statement {
 		if (ScriptParser.tokenizer.match(UnicodeInstruction.name))
 			return new UnicodeInstruction(returns);
 		if (ScriptParser.tokenizer.match(UninstallButtonTextInstruction.name))
-			return new UninstallIconInstruction(returns);
+			return new UninstallButtonTextInstruction(returns);
 		if (ScriptParser.tokenizer.match(UninstallCaptionInstruction.name))
 			return new UninstallCaptionInstruction(returns);
 		if (ScriptParser.tokenizer.match(UninstallIconInstruction.name))
-			return new UninstallButtonTextInstruction(returns);
+			return new UninstallIconInstruction(returns);
 		if (ScriptParser.tokenizer.match(UninstallSubCaptionInstruction.name))
 			return new UninstallSubCaptionInstruction(returns);
 		if (ScriptParser.tokenizer.match(UninstallTextInstruction.name))

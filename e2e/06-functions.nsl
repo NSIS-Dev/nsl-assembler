@@ -1,0 +1,156 @@
+/*
+ * Functions: parameters, single and multiple return values, overloading,
+ * recursion, and the installer/uninstaller namespace split.
+ *
+ * The last of those is the reason this file exists in the shape it does. NSIS
+ * keeps uninstaller functions under a "un." prefix and rejects an unprefixed
+ * Call from uninstaller code, so a call written identically in the two contexts
+ * has to assemble to two different names. guard.nsl depends on that working.
+ */
+
+#include "guard.nsl"
+
+Name("06 functions");
+OutFile("06-functions.exe");
+
+// --- Installer functions ---
+
+function NoParamsNoReturn()
+{
+  DetailPrint("function: no params, no return");
+}
+
+function OneParam($param)
+{
+  DetailPrint("function: one param = ".$param);
+}
+
+function TwoParams($a, $b)
+{
+  DetailPrint("function: two params = ".$a." ".$b);
+}
+
+function ReturnsOne($n)
+{
+  return $n * 2;
+}
+
+function ReturnsThree()
+{
+  return (1, 2, 3);
+}
+
+// Overloaded on parameter count.
+function Overloaded($a)
+{
+  return $a;
+}
+
+function Overloaded($a, $b)
+{
+  return $a + $b;
+}
+
+// Overloaded on return count: same name, same arity, two returns.
+function Overloaded($a, $b, $c)
+{
+  return $a + $b + $c;
+}
+
+function Overloaded($a, $b, $c, $d)
+{
+  return ($a + $b, $c + $d);
+}
+
+// Recursion. Guarded by a depth parameter so it terminates.
+function Countdown($n)
+{
+  if ($n <= 0)
+    return 0;
+  DetailPrint("countdown: ".$n);
+  return Countdown($n - 1);
+}
+
+// An early return. "return" always needs a value - a bare one is a parse error
+// even in a function that returns nothing. See KNOWN-GAPS.md.
+function EarlyReturn($n)
+{
+  if ($n < 0)
+    return 0;
+  DetailPrint("early return: reached the end with ".$n);
+  return 1;
+}
+
+// --- Uninstaller functions, same names, separate namespace ---
+
+uninstall function NoParamsNoReturn()
+{
+  DetailPrint("un.function: no params, no return");
+}
+
+uninstall function ReturnsOne($n)
+{
+  return $n * 3;
+}
+
+section Test("functions")
+{
+  NoParamsNoReturn();
+  OneParam("x");
+  TwoParams("x", "y");
+
+  $R0 = ReturnsOne(21);
+  DetailPrint("ReturnsOne = ".$R0);
+
+  ($R1, $R2, $R3) = ReturnsThree();
+  DetailPrint("ReturnsThree = ".$R1." ".$R2." ".$R3);
+
+  // Overload resolution by arity ...
+  $R0 = Overloaded(1);
+  $R1 = Overloaded(1, 2);
+  $R2 = Overloaded(1, 2, 3);
+  DetailPrint("overloads = ".$R0." ".$R1." ".$R2);
+
+  // ... and by return count.
+  ($R0, $R1) = Overloaded(1, 2, 3, 4);
+  DetailPrint("overload by returns = ".$R0." ".$R1);
+
+  /*
+   * The return value is taken even though nothing needs it: calling a function
+   * that returns a value as a bare statement throws a NullPointerException out
+   * of the assembler when the function also takes parameters. See KNOWN-GAPS.md.
+   */
+  $R0 = Countdown(3);
+  $R0 = EarlyReturn(1);
+  $R0 = EarlyReturn(-1);
+
+  // A call in expression position, which only single-return functions allow.
+  $R0 = ReturnsOne(2) + ReturnsOne(3);
+  DetailPrint("calls in an expression = ".$R0);
+
+  // A call as an argument to an instruction.
+  DetailPrint("call as an argument = ".ReturnsOne(5));
+
+  // A call as a condition.
+  if (ReturnsOne(1) == 2)
+    DetailPrint("call as a condition");
+
+  /*
+   * Indirect calls are not covered: GetFunctionAddress and Call both have
+   * wrapper classes but neither is wired into Statement.matchInstruction(), so
+   * a script using them fails with "Function ... not found". See KNOWN-GAPS.md.
+   */
+}
+
+uninstall section Uninstall("functions")
+{
+  /*
+   * Written exactly as in the installer section above, and it has to assemble
+   * to "Call un.NoParamsNoReturn". If it ever emits the unprefixed name again,
+   * makensis rejects the script outright - which is the point.
+   */
+  NoParamsNoReturn();
+
+  $R0 = ReturnsOne(21);
+  DetailPrint("un.ReturnsOne = ".$R0);
+}

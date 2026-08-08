@@ -1,0 +1,67 @@
+/*
+ * guard.nsl
+ *
+ * Runtime safety for the end-to-end corpus. Every script in e2e/ includes this
+ * file first.
+ *
+ * The corpus exercises instructions that write to the registry, the filesystem
+ * and the shell, and the build product of each script is a real, runnable
+ * installer. They must be inert. RuntimeGuard() is called from both .onInit
+ * callbacks and aborts before any section can run.
+ *
+ * The message box is deliberate: an installer that dies silently looks broken.
+ * This one says why it did nothing, so anyone who double clicks a stray corpus
+ * binary knows it is a test artifact.
+ *
+ * Two definitions of the same function because NSIS keeps installer and
+ * uninstaller functions in separate namespaces - a un. function cannot call an
+ * installer one. The call sites are identical; the assembler emits
+ * "Call RuntimeGuard" in .onInit and "Call un.RuntimeGuard" in un.onInit.
+ *
+ * Abort propagates out of the Call - verified by running a probe installer
+ * under Wine, not assumed. Re-run that probe if the shape of this guard
+ * changes; it is the one part of the design resting on NSIS runtime semantics
+ * rather than on emitted syntax.
+ */
+
+// Second layer: a corpus binary cannot touch HKLM or Program Files even if the
+// guard above were to fail.
+RequestExecutionLevel("user");
+
+function RuntimeGuard()
+{
+  MessageBox("MB_OK", "This shall never run, exiting.");
+  Abort();
+}
+
+uninstall function RuntimeGuard()
+{
+  MessageBox("MB_OK", "This shall never run, exiting.");
+  Abort();
+}
+
+function .onInit()
+{
+  RuntimeGuard();
+}
+
+uninstall function .onInit()
+{
+  RuntimeGuard();
+}
+
+/*
+ * NSIS discards the uninstaller entirely - and warns - unless WriteUninstaller
+ * is called somewhere, which would leave un.onInit above compiled into nothing.
+ * This pair keeps the uninstaller real so that the guard covering it is real
+ * too, and it costs the corpus one extra section.
+ */
+section GuardWriteUninstaller("Guard")
+{
+  WriteUninstaller($INSTDIR."\\GuardUninstall.exe");
+}
+
+uninstall section GuardUninstall("Guard")
+{
+  DetailPrint("Guarded.");
+}

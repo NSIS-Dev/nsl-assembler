@@ -1,5 +1,5 @@
 /*
- * SectionSetFlagsInstruction.java
+ * SectionSetInstTypesInstruction.java
  */
 
 package nsl.instruction;
@@ -14,7 +14,7 @@ import nsl.expression.*;
  * @author Stuart
  */
 public class SectionSetInstTypesInstruction extends AssembleExpression {
-	public static final String name = "SectionSetFlags";
+	public static final String name = "SectionSetInstTypes";
 	private final Expression index;
 	private final Expression instTypes;
 

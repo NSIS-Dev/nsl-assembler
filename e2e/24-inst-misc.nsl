@@ -1,0 +1,106 @@
+/*
+ * The remainder: instructions that did not fit any of the shapes above.
+ *
+ * Mostly global attributes with no natural grouping, plus the few run-time
+ * instructions that end the installer. Its job is to close the gap against
+ * Statement.matchInstruction() rather than to tell a story.
+ */
+
+/*
+ * Target and CPU come before the guard include, which is the one place in the
+ * corpus where that order matters: they have to precede anything that touches
+ * the header, and the functions guard.nsl defines already do.
+ */
+// CPU first, then Target: both set the stub, and ManifestLongPathAware below
+// is only compatible with a Unicode one, so Target has to have the last word.
+CPU("x86");
+Target("x86-unicode");
+
+#include "guard.nsl"
+
+Name("24 inst misc");
+OutFile("24-inst-misc.exe");
+
+// Silent install and uninstall.
+SilentInstall("normal");
+SilentUninstall("normal");
+
+// Compression level, on top of the compressor chosen in 16.
+SetCompressionLevel(9);
+
+// Licence page text, and a language string scoped to it.
+LicenseData("fixtures/licence.txt");
+LicenseText("Read this first");
+LicenseLangString("CorpusLicence", 1033, "fixtures/licence.txt");
+
+// Background window.
+BGGradient("000000", "0000FF", "FFFFFF");
+BGFont("Tahoma", 40, 700, true, false, false);
+
+// Application manifest.
+ManifestDPIAware(true);
+ManifestGdiScaling(true);
+ManifestLongPathAware(true);
+ManifestDisableWindowFiltering(true);
+ManifestSupportedOS("Win10");
+/*
+ * ManifestAppendCustomString is not covered: makensis 3.12 rejects every
+ * two-argument spelling of it with its own usage line, including one written
+ * by hand in a bare .nsi, so this is an NSIS-side limitation rather than
+ * anything nsL does.
+ */
+
+page License();
+page Components();
+page InstFiles();
+
+section Test("misc")
+{
+  // UnsafeStrCpy is StrCpy without the literal-argument check, so it is an
+  // expression like StrCpy is - not a two-argument statement.
+  $R2 = "unchecked";
+  $R0 = UnsafeStrCpy($R2, 5);
+  DetailPrint("misc: ".$R0);
+
+  // A known folder by GUID - Downloads.
+  $R1 = GetKnownFolderPath("{374DE290-123F-4565-9164-39C4925E467B}");
+  DetailPrint("misc: known folder ".$R1);
+
+  // DLL registration, and a direct call into one.
+  RegDLL($SYSDIR."\\nonexistent.dll");
+  UnRegDLL($SYSDIR."\\nonexistent.dll");
+  CallInstDLL($SYSDIR."\\nonexistent.dll", "SomeFunction");
+
+  // Both of these end the installer, so they come last and are guarded by a
+  // condition that is false at run time.
+  if (AbortCalled())
+  {
+    SetRebootFlag(true);
+    Reboot();
+  }
+
+  if (AbortCalled())
+    Quit();
+}
+
+/*
+ * Not covered here:
+ *
+ *   Icon, UninstallIcon, WindowIcon, CheckBitmap, AddBrandingImage,
+ *   SetBrandingImage - all need real image files, and CheckBitmap in
+ *   particular needs one laid out the way NSIS expects. A fixture set for
+ *   these is worth adding, but it is bitmap authoring rather than corpus
+ *   authoring.
+ *
+ *   LoadLanguageFile - needs an .nlf from the NSIS installation, so covering
+ *   it would tie the corpus to a particular NSIS layout.
+ *
+ *   GetDLLVersionLocal - reads the file while compiling and so needs a real
+ *   DLL. 18 covers the run-time GetDLLVersion instead.
+ *
+ *   LogSet, LogText - rejected outright unless NSIS was built with
+ *   NSIS_CONFIG_LOG.
+ *
+ *   SetCtlColors, SetFont, VIAddVersionKey, VIProductVersion, UninstallIcon,
+ *   UninstallButtonText - broken in the assembler. See KNOWN-GAPS.md.
+ */

@@ -1,0 +1,2 @@
+nsL end-to-end corpus fixture.
+This file exists so File() and friends have something real to embed.

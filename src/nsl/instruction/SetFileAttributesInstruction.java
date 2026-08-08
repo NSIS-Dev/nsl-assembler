@@ -41,7 +41,10 @@ public class SetFileAttributesInstruction extends AssembleExpression {
 	/** Assembles the source code. */
 	@Override
 	public void assemble() throws IOException {
-		throw new UnsupportedOperationException("Not supported.");
+		Expression varOrFile = AssembleExpression.getRegisterOrExpression(this.file);
+		AssembleExpression.assembleIfRequired(this.attributes);
+		ScriptParser.writeLine(name + " " + varOrFile + " " + this.attributes);
+		varOrFile.setInUse(false);
 	}
 
 	/**
@@ -51,9 +54,6 @@ public class SetFileAttributesInstruction extends AssembleExpression {
 	 */
 	@Override
 	public void assemble(Register var) throws IOException {
-		Expression varOrFile = AssembleExpression.getRegisterOrExpression(this.file);
-		AssembleExpression.assembleIfRequired(this.attributes);
-		ScriptParser.writeLine(name + " " + var + " " + varOrFile + " " + this.attributes);
-		varOrFile.setInUse(false);
+		throw new UnsupportedOperationException("Not supported.");
 	}
 }

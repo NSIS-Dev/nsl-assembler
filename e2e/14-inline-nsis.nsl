@@ -1,0 +1,77 @@
+/*
+ * #nsis / #nsisend - raw NSIS passed straight through.
+ *
+ * The block is written out verbatim, which means it bypasses everything the
+ * assembler otherwise guarantees: it does not go through RegisterList, so
+ * anything it clobbers is invisible to the register allocator, and it does not
+ * go through scope checking. That makes it the escape hatch for NSIS features
+ * nsL has no syntax for - !include, !insertmacro, ${...} macros.
+ *
+ * Inside a #macro the block gets the macro's parameters as ${Name} and its
+ * return registers as ${ReturnVarN}, which is how an instruction wrapper can be
+ * written in nsL itself.
+ */
+
+#include "guard.nsl"
+
+Name("14 inline nsis");
+OutFile("14-inline-nsis.exe");
+
+// At global scope: directives nsL has no equivalent for.
+#nsis
+  !define InlineDefine "defined by raw NSIS"
+  !include "LogicLib.nsh"
+#nsisend
+
+section Test("inline nsis")
+{
+  // A plain block in a section body, emitted exactly as written.
+  #nsis
+    DetailPrint "inline: a raw NSIS line"
+    DetailPrint "inline: ${InlineDefine}"
+  #nsisend
+
+  /*
+   * Raw NSIS and nsL interleaved, sharing registers. $R1 has to be given a
+   * value in nsL before the block writes to it: scope checking cannot see
+   * inside a #nsis block, so a register only ever assigned in there is still
+   * "may not have been initialised" as far as the assembler is concerned.
+   */
+  $R0 = "set by nsL";
+  $R1 = "";
+  #nsis
+    DetailPrint "inline: reads $R0 = $R0"
+    StrCpy $R1 "set by raw NSIS"
+  #nsisend
+  DetailPrint("nsL reads back: ".$R1);
+
+  // Something with no nsL syntax at all: a LogicLib block.
+  #nsis
+    ${If} $R0 != ""
+      DetailPrint "inline: LogicLib says $R0 is set"
+    ${EndIf}
+  #nsisend
+
+  /*
+   * Inside a macro, the parameters are available as NSIS defines and the return
+   * registers as ${ReturnVarN}. This is the documented way to wrap an
+   * instruction the assembler does not know - ReadINIStr here, which it does
+   * know, so the two can be compared.
+   */
+  #macro RawReadINIStr(IniFile, SectionName, ValueName)
+    #if (Returns != 1)
+      #error "RawReadINIStr returns exactly one value"
+    #endif
+    #nsis
+      ReadINIStr ${ReturnVar1} "${IniFile}" "${SectionName}" "${ValueName}"
+    #nsisend
+    #return 1
+  #macroend
+
+  $R2 = RawReadINIStr("fixtures/sample.ini", "Section", "Value");
+  DetailPrint("macro-wrapped ReadINIStr = ".$R2);
+
+  // The built-in wrapper, for the same call.
+  $R3 = ReadINIStr("fixtures/sample.ini", "Section", "Value");
+  DetailPrint("built-in ReadINIStr      = ".$R3);
+}

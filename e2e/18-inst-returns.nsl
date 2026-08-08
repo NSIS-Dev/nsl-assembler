@@ -1,0 +1,86 @@
+/*
+ * Instructions that produce a value, which nsL spells as an assignment rather
+ * than as an output-variable argument.
+ *
+ * Two shapes: one return value, usable anywhere an expression is, and several
+ * return values, which need the parenthesised assignment form and cannot appear
+ * inside a larger expression.
+ */
+
+#include "guard.nsl"
+
+Name("18 inst returns");
+OutFile("18-inst-returns.exe");
+
+section Test("returning instructions")
+{
+  // --- One return value ---
+
+  // Environment and paths.
+  $R0 = ReadEnvStr("PATH");
+  $R1 = ExpandEnvStrings("%PATH%");
+  $R2 = GetTempFileName();
+  $R3 = GetTempFileName($TEMP);
+  $R4 = SearchPath("notepad.exe");
+
+  // Registry.
+  $R5 = ReadRegStr("HKLM", "Software\\Microsoft\\Windows\\CurrentVersion", "ProgramFilesDir");
+  $R6 = ReadRegDWORD("HKLM", "Software\\nsL-corpus", "ADword");
+  $R7 = EnumRegKey("HKLM", "Software", 0);
+  $R8 = EnumRegValue("HKLM", "Software\\nsL-corpus", 0);
+
+  // INI files.
+  $R9 = ReadINIStr("fixtures/sample.ini", "Section", "Value");
+
+  // Installer state.
+  $0 = GetErrorLevel();
+  $1 = GetCurInstType();
+  $2 = GetInstDirError();
+  $3 = GetRegView();
+  $4 = GetShellVarContext();
+  $5 = GetWinVer("Major");
+  $6 = InstTypeGetText(0);
+
+  // Formatting and copying, which are expressions in nsL but instructions in
+  // NSIS.
+  $7 = IntFmt("%08X", 255);
+  $8 = StrCpy($R0, 5);
+  $9 = StrCpy($R0, 5, 2);
+
+  DetailPrint("returns: ".$0." ".$1." ".$2." ".$3." ".$4);
+  DetailPrint("returns: ".$5." ".$6." ".$7." ".$8." ".$9);
+
+  // Windows and controls.
+  $R0 = FindWindow("#32770", "");
+  $R1 = GetDlgItem($HWNDPARENT, 1);
+  $R2 = CreateFont("Tahoma", 8);
+
+  // A return value used directly in an expression, without a variable.
+  if (GetErrorLevel() == 0)
+    DetailPrint("returns: in a condition");
+  DetailPrint("returns: in an argument ".GetErrorLevel());
+
+  // --- Several return values ---
+
+  // Two: the high and low halves of a version number. The run-time form, not
+  // GetDLLVersionLocal - that one reads the file while compiling and needs a
+  // real DLL, which the corpus does not ship.
+  ($R3, $R4) = GetDLLVersion($SYSDIR."\\kernel32.dll");
+
+  // Two: a file time, split the same way.
+  ($R5, $R6) = GetFileTimeLocal("fixtures/sample.txt");
+
+  DetailPrint("multi: ".$R3." ".$R4." ".$R5." ".$R6);
+
+  // Section state, read back from the section defined below.
+  $R7 = SectionGetText(0);
+  $R8 = SectionGetFlags(0);
+  $R9 = SectionGetSize(0);
+  $0 = SectionGetInstTypes(0);
+  DetailPrint("section state: ".$R7." ".$R8." ".$R9." ".$0);
+}
+
+section Other("another section")
+{
+  DetailPrint("returns: other section");
+}

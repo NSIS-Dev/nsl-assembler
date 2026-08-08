@@ -1,0 +1,87 @@
+/*
+ * Pages, in both forms: the declaration ending in a semicolon, and the PageEx
+ * form with a body.
+ *
+ * Page order is significant to NSIS and the callbacks named here have to exist,
+ * so this file is as much about the interaction between page declarations and
+ * function definitions as about the page syntax itself.
+ */
+
+#include "guard.nsl"
+
+Name("08 pages");
+OutFile("08-pages.exe");
+LicenseData("fixtures/licence.txt");
+
+// --- Callbacks referenced by the declarations below ---
+
+function LicensePre()
+{
+  DetailPrint("page: license pre");
+}
+
+function ComponentsShow()
+{
+  DetailPrint("page: components show");
+}
+
+function DirectoryLeave()
+{
+  DetailPrint("page: directory leave");
+}
+
+function CustomCreate()
+{
+  DetailPrint("page: custom create");
+}
+
+function CustomLeave()
+{
+  DetailPrint("page: custom leave");
+}
+
+uninstall function UninstConfirmPre()
+{
+  DetailPrint("un.page: confirm pre");
+}
+
+// --- Installer pages ---
+
+// A pre function. (The no-argument form is page InstFiles() below.)
+page License("LicensePre");
+
+// pre, show and leave functions, then the cancel flag.
+page Components("", "ComponentsShow");
+page Directory("", "", "DirectoryLeave");
+
+// A custom page: create function, leave function, caption.
+page Custom("CustomCreate", "CustomLeave", "A custom page");
+
+page InstFiles();
+
+// The PageEx form: a body instead of a semicolon.
+page Directory("")
+{
+  DirVar($INSTDIR);
+  DirText("PageEx form with a body");
+}
+
+// --- Uninstaller pages ---
+
+/*
+ * The callback name is passed through verbatim, so an uninstaller page has to
+ * name the emitted function - "un." prefix and all - rather than the name the
+ * uninstall function was declared with. See KNOWN-GAPS.md.
+ */
+uninstall page UninstConfirm("un.UninstConfirmPre");
+uninstall page InstFiles();
+
+section Test("pages")
+{
+  DetailPrint("section body");
+}
+
+uninstall section Uninstall("Uninstall")
+{
+  DetailPrint("un.section body");
+}

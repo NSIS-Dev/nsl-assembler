@@ -41,7 +41,7 @@ public class SetFontInstruction extends AssembleExpression {
 		if (!ExpressionType.isInteger(this.fontSize))
 			throw new NslArgumentException(name, 2, ExpressionType.Integer);
 
-		if (paramsCount > 1) {
+		if (paramsCount > 2) {
 			this.langId = paramsList.get(2);
 			if (!ExpressionType.isInteger(this.langId))
 				throw new NslArgumentException(name, 3, ExpressionType.Integer);
@@ -53,14 +53,16 @@ public class SetFontInstruction extends AssembleExpression {
 	/** Assembles the source code. */
 	@Override
 	public void assemble() throws IOException {
-		AssembleExpression.assembleIfRequired(this.fontFace);
-		AssembleExpression.assembleIfRequired(this.fontSize);
-		String write = name + " " + this.fontFace + " " + this.fontSize;
+		String write = name;
 
 		if (this.langId != null) {
 			AssembleExpression.assembleIfRequired(this.langId);
-			write += " " + this.langId;
+			write += " /LANG=" + this.langId;
 		}
+
+		AssembleExpression.assembleIfRequired(this.fontFace);
+		AssembleExpression.assembleIfRequired(this.fontSize);
+		write += " " + this.fontFace + " " + this.fontSize;
 
 		ScriptParser.writeLine(write);
 	}

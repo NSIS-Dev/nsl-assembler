@@ -6,7 +6,7 @@ nsL is a high-level language for [NSIS](http://nsis.sourceforge.net). The nsL as
 
 ## Source Files
 
-Just like with NSIS, one writes their installation wizard code in a plain text file with a text editor such as Notepad. For nsL, the source code files must have an “nsl” file extension. Right clicking on an nsL source code file in Windows Explorer will show the “Compile nsL Script” option. This option will run the nsL Assembler on the chosen file, which assembles the corresponding NSIS (.nsi) script. The makensisw compiler executable is then automatically run on the assembled NSIS script to build the installation wizard executable.
+Just like with NSIS, one writes their installation wizard code in a plain text file with a text editor such as Notepad. For nsL, the source code files must have an “nsl” file extension. Right clicking on an nsL source code file in Windows Explorer will show the “Compile nsL Script” option. This option will run the nsL Assembler on the chosen file, which assembles the corresponding NSIS (.nsi) script. The NSIS compiler is then automatically run on the assembled NSIS script to build the installation wizard executable — `makensisw.exe` on Windows, or `makensis` from the `PATH` on other platforms.
 
 ## Syntax
 

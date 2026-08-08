@@ -1,0 +1,85 @@
+/*
+ * The switch convention: where NSIS takes a /FLAG, nsL takes a Boolean.
+ *
+ * This is the largest single source of translation bugs in the assembler,
+ * because the Boolean has to turn back into a flag in the right position -
+ * before the operands for some instructions, after them for others - and
+ * because passing false has to emit nothing at all rather than a literal
+ * "false".
+ *
+ * Every instruction below therefore appears twice: once with the flag set and
+ * once without.
+ */
+
+#include "guard.nsl"
+
+Name("20 inst switches");
+OutFile("20-inst-switches.exe");
+
+section Test("switch instructions")
+{
+  // Reserved files, which nsL requires be declared inside a section even though
+  // NSIS allows them at global scope too.
+  ReserveFile("fixtures/sample.txt");
+  ReserveFileRecursive("fixtures/subdir");
+
+  SetOutPath($INSTDIR);
+
+  // --- Delete: /REBOOTOK ---
+  Delete($INSTDIR."\\a.txt");
+  Delete($INSTDIR."\\b.txt", true);
+
+  // --- RMDir: /REBOOTOK, and the separate recursive wrapper ---
+  RMDir($INSTDIR."\\empty");
+  RMDir($INSTDIR."\\empty", true);
+  RMDirRecursive($INSTDIR."\\tree");
+  RMDirRecursive($INSTDIR."\\tree", true);
+
+  // --- Rename: /REBOOTOK ---
+  Rename($INSTDIR."\\from.txt", $INSTDIR."\\to.txt");
+  Rename($INSTDIR."\\from.txt", $INSTDIR."\\to.txt", true);
+
+  // --- File: /oname, and the recursive wrapper for /r ---
+  File("fixtures/sample.txt");
+  File("fixtures/sample.txt", "renamed.txt");
+  FileRecursive("fixtures/subdir");
+
+  // --- CopyFiles: /SILENT and /FILESONLY ---
+  CopyFiles($INSTDIR."\\src", $INSTDIR."\\dst");
+  CopyFiles($INSTDIR."\\src", $INSTDIR."\\dst", true);
+  CopyFiles($INSTDIR."\\src", $INSTDIR."\\dst", true, true);
+
+  // --- SetOutPath and CreateDirectory, neither of which takes a flag, for
+  // contrast with the ones above ---
+  CreateDirectory($INSTDIR."\\made");
+
+  // --- SetCompressor: /SOLID and /FINAL are global, so they live in 16 ---
+
+  // --- ExecShell and its waiting variant ---
+  ExecShell("open", $INSTDIR);
+  ExecShell("open", $INSTDIR, "");
+  ExecShellWait("open", $INSTDIR);
+
+  // --- CreateShortCut, which has a long optional tail rather than a flag ---
+  CreateShortCut($INSTDIR."\\short.lnk", $INSTDIR."\\target.exe");
+  CreateShortCut($INSTDIR."\\short.lnk", $INSTDIR."\\target.exe", "-arg");
+  CreateShortCut(
+    $INSTDIR."\\short.lnk",
+    $INSTDIR."\\target.exe",
+    "-arg",
+    $INSTDIR."\\target.exe",
+    0,
+    "SW_SHOWNORMAL",
+    "",
+    "a description");
+
+  // --- WriteUninstaller, so the uninstaller below is real ---
+  WriteUninstaller($INSTDIR."\\Uninstall-20.exe");
+}
+
+uninstall section Uninstall("Uninstall")
+{
+  // The same convention applies unchanged on the uninstaller side.
+  Delete($INSTDIR."\\a.txt", true);
+  RMDirRecursive($INSTDIR, true);
+}
