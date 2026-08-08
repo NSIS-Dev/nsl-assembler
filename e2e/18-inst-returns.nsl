@@ -31,6 +31,14 @@ section Test("returning instructions")
   $R7 = GetFullPathName($EXEDIR, false);
   DetailPrint("full path: ".$R5." ".$R6." ".$R7);
 
+  // Raw memory. Never actually executed - guard.nsl aborts before the section
+  // runs - since a made-up address would fault. Both operands go through
+  // getRegisterOrExpression, so the second call also covers the case where they
+  // are already registers rather than literals.
+  $R8 = ReadMemory(0, 4);
+  $R9 = ReadMemory($R8, $R4);
+  DetailPrint("memory: ".$R8." ".$R9);
+
   // Registry.
   $R5 = ReadRegStr("HKLM", "Software\\Microsoft\\Windows\\CurrentVersion", "ProgramFilesDir");
   $R6 = ReadRegDWORD("HKLM", "Software\\nsL-corpus", "ADword");

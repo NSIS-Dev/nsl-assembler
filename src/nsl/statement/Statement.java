@@ -288,6 +288,8 @@ public abstract class Statement {
 			return new ReadEnvStrInstruction(returns);
 		if (ScriptParser.tokenizer.match(ReadINIStrInstruction.name))
 			return new ReadINIStrInstruction(returns);
+		if (ScriptParser.tokenizer.match(ReadMemoryInstruction.name))
+			return new ReadMemoryInstruction(returns);
 		if (ScriptParser.tokenizer.match(ReadRegDWORDInstruction.name))
 			return new ReadRegDWORDInstruction(returns);
 		if (ScriptParser.tokenizer.match(ReadRegStrInstruction.name))
