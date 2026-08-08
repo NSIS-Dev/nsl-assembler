@@ -189,6 +189,8 @@ public abstract class Statement {
 			return new GetFileTimeInstruction(returns);
 		if (ScriptParser.tokenizer.match(GetFileTimeLocalInstruction.name))
 			return new GetFileTimeLocalInstruction(returns);
+		if (ScriptParser.tokenizer.match(GetFullPathNameInstruction.name))
+			return new GetFullPathNameInstruction(returns);
 		if (ScriptParser.tokenizer.match(GetInstDirErrorInstruction.name))
 			return new GetInstDirErrorInstruction(returns);
 		if (ScriptParser.tokenizer.match(GetKnownFolderPathInstruction.name))

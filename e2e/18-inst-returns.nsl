@@ -23,6 +23,14 @@ section Test("returning instructions")
   $R3 = GetTempFileName($TEMP);
   $R4 = SearchPath("notepad.exe");
 
+  // GetFullPathName takes the /SHORT flag as an optional trailing Boolean, the
+  // same shape ReserveFile uses for /nonfatal. It has to be a literal, since
+  // the flag is decided while assembling.
+  $R5 = GetFullPathName("fixtures\\sample.txt");
+  $R6 = GetFullPathName("fixtures\\sample.txt", true);
+  $R7 = GetFullPathName($EXEDIR, false);
+  DetailPrint("full path: ".$R5." ".$R6." ".$R7);
+
   // Registry.
   $R5 = ReadRegStr("HKLM", "Software\\Microsoft\\Windows\\CurrentVersion", "ProgramFilesDir");
   $R6 = ReadRegDWORD("HKLM", "Software\\nsL-corpus", "ADword");
