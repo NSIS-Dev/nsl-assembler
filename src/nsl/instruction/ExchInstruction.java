@@ -27,15 +27,20 @@ public class ExchInstruction extends AssembleExpression {
 			throw new NslContextException(EnumSet.of(NslContext.Section, NslContext.Function), name);
 		if (returns > 0) throw new NslReturnValueException(name);
 
+		// No argument is the bare form, which swaps the top two stack items.
 		ArrayList<Expression> paramsList = Expression.matchList();
-		if (paramsList.size() != 1) throw new NslArgumentException(name, 1);
+		if (paramsList.size() > 1) throw new NslArgumentException(name, 0, 1);
 
-		this.value = paramsList.get(0);
+		this.value = paramsList.isEmpty() ? null : paramsList.get(0);
 	}
 
 	/** Assembles the source code. */
 	@Override
 	public void assemble() throws IOException {
+		if (this.value == null) {
+			ScriptParser.writeLine(name);
+			return;
+		}
 		Expression varOrValue = AssembleExpression.getRegisterOrExpression(this.value);
 		ScriptParser.writeLine(name + " " + varOrValue);
 		varOrValue.setInUse(false);

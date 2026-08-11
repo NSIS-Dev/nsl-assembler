@@ -31,6 +31,11 @@ public class GetLabelAddressInstruction extends AssembleExpression {
 		if (paramsList.size() != 1) throw new NslArgumentException(name, 1);
 
 		this.label = paramsList.get(0);
+		// nsL generates its own labels and has no syntax for declaring one, so the only
+		// label this can name is one written in a #nsis block. Either way NSIS resolves
+		// it at compile time, so a runtime value could never be right.
+		if (!ExpressionType.isString(this.label))
+			throw new NslArgumentException(name, 1, ExpressionType.String);
 	}
 
 	/** Assembles the source code. */
@@ -46,8 +51,6 @@ public class GetLabelAddressInstruction extends AssembleExpression {
 	 */
 	@Override
 	public void assemble(Register var) throws IOException {
-		Expression varOrLabel = AssembleExpression.getRegisterOrExpression(this.label);
-		ScriptParser.writeLine(name + " " + var + " " + varOrLabel);
-		varOrLabel.setInUse(false);
+		ScriptParser.writeLine(name + " " + var + " " + this.label.getStringValue());
 	}
 }

@@ -179,6 +179,49 @@ public class FunctionInfo extends CodeInfo {
 	}
 
 	/**
+	 * Resolves a function that is named rather than called - taking its address, or calling it
+	 * through {@code Call} - to the name NSIS knows it by. There is no argument list at such a site,
+	 * so there is no signature to match on and the name has to be unique; the mangling {@link
+	 * #getName()} applies to overloads is exactly what makes an ambiguous name unresolvable here.
+	 *
+	 * @param name the function name as written in the source
+	 * @param inUninstaller whether the reference was made from uninstaller code
+	 * @param lineNo the line the reference was made on
+	 * @return the name to write into the NSIS script
+	 */
+	public static String resolveNsisName(String name, boolean inUninstaller, int lineNo) {
+		// Uninstaller functions live in their own namespace under an "un." prefix, the
+		// same fallback FunctionCallExpression applies to a direct call.
+		FunctionInfo functionInfo = null;
+		if (inUninstaller) functionInfo = findByName("un." + name, lineNo);
+		if (functionInfo == null) functionInfo = findByName(name, lineNo);
+		if (functionInfo == null) throw new NslException("Function \"" + name + "\" not found", lineNo);
+		return functionInfo.getName();
+	}
+
+	/**
+	 * Searches for the one function with the given name, ignoring the call signature.
+	 *
+	 * @param name the function name
+	 * @param lineNo the line the reference was made on
+	 * @return the matching function, or <code>null</code> if no function has that name
+	 */
+	private static FunctionInfo findByName(String name, int lineNo) {
+		FunctionInfo found = null;
+		for (FunctionInfo functionInfo : list) {
+			if (!functionInfo.name.equalsIgnoreCase(name)) continue;
+			if (found != null)
+				throw new NslException(
+						"Function \""
+								+ name
+								+ "\" is overloaded, so which one is meant here cannot be determined",
+						lineNo);
+			found = functionInfo;
+		}
+		return found;
+	}
+
+	/**
 	 * Tests whether or not the current function call matches the given function call.
 	 *
 	 * @param name the name of the function being called

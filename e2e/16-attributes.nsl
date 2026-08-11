@@ -57,6 +57,11 @@ UninstallSubCaption(0, "custom uninstall page caption");
 UninstallText("This removes the corpus build.");
 FileErrorText("Could not write $0");
 
+// The dialog resources themselves. The second argument has to be a UI built by
+// NSIS, so it is taken from the install tree via nsisconst - nsL has no syntax
+// of its own for a ${define}.
+ChangeUI("all", nsisconst(NSISDIR)."\\Contrib\\UIs\\modern.exe");
+
 // Colours and fonts.
 InstallColors("000000", "FFFFFF");
 LicenseBkColor("FFFFFF");

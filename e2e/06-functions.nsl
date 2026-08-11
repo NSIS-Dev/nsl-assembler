@@ -136,10 +136,31 @@ section Test("functions")
     DetailPrint("call as a condition");
 
   /*
-   * Indirect calls are not covered: GetFunctionAddress and Call both have
-   * wrapper classes but neither is wired into Statement.matchInstruction(), so
-   * a script using them fails with "Function ... not found". See KNOWN-GAPS.md.
+   * The address family. Call here is the indirect form - it passes no arguments
+   * and takes no return values, which is why the ordinary someFunction() syntax
+   * exists alongside it.
+   *
+   * The point of these being in this file is the name mangling: nsL appends
+   * _params_returns to any function with a signature, so ReturnsOne below has to
+   * come out as ReturnsOne_1_1 and not as the name written here. Anything that
+   * wrote the argument through verbatim would emit a name makensis rejects.
    */
+  $R0 = GetFunctionAddress("NoParamsNoReturn");
+  Call($R0);
+  Call("NoParamsNoReturn");
+
+  // Only the address is taken for the mangled one: Call passes nothing, so
+  // actually calling a function with a signature would leave the stack wrong.
+  $R1 = GetFunctionAddress("ReturnsOne");
+
+  // The address of this instruction, and of a label - which only a #nsis block
+  // can declare, since nsL owns the label namespace and has no syntax for one.
+  $R2 = GetCurrentAddress();
+  #nsis
+    corpus_label:
+  #nsisend
+  $R3 = GetLabelAddress("corpus_label");
+  DetailPrint("addresses = ".$R1." ".$R2." ".$R3);
 }
 
 uninstall section Uninstall("functions")
@@ -153,4 +174,10 @@ uninstall section Uninstall("functions")
 
   $R0 = ReturnsOne(21);
   DetailPrint("un.ReturnsOne = ".$R0);
+
+  // Same again for the address family: written unprefixed, and it has to resolve
+  // to un.NoParamsNoReturn or makensis rejects the script.
+  $R1 = GetFunctionAddress("NoParamsNoReturn");
+  Call($R1);
+  Call("NoParamsNoReturn");
 }

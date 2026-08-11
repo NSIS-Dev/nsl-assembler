@@ -29,8 +29,7 @@ public class ChangeUIInstruction extends AssembleExpression {
 		if (returns > 0) throw new NslReturnValueException(name);
 
 		ArrayList<Expression> paramsList = Expression.matchList();
-		int paramsCount = paramsList.size();
-		if (paramsCount != 1) throw new NslArgumentException(name, 1);
+		if (paramsList.size() != 2) throw new NslArgumentException(name, 2);
 
 		this.dialog = paramsList.get(0);
 		if (!ExpressionType.isString(this.dialog))

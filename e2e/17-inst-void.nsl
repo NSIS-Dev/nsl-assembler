@@ -62,10 +62,23 @@ section Test("void instructions")
   // Does nothing, so the only thing to get wrong is emitting an operand.
   Nop();
 
-  // The stack.
+  // The stack. Exch takes no operand to swap the top two items, a variable to
+  // swap with the top one, or an index to swap the top with that item.
   Push("pushed");
+  Push("pushed second");
+  Exch();
+  $R1 = "swapped in";
+  Exch($R1);
+  Exch(1);
   $R0 = Pop();
   DetailPrint("void: popped ".$R0);
+  $R0 = Pop();
+  DetailPrint("void: popped ".$R0);
+
+  // Sleep, with a literal and with an operand that has to be assembled first.
+  Sleep(10);
+  $R2 = 5;
+  Sleep($R2 * 2);
 
   // Install type selection.
   SetCurInstType(0);
@@ -78,10 +91,9 @@ section Test("void instructions")
    */
 
   /*
-   * Not covered: Sleep, Exch, ChangeUI, Call, GetCurrentAddress,
-   * GetFunctionAddress and GetLabelAddress. All seven have wrapper classes in
-   * nsl/instruction/ that are never referenced from
-   * Statement.matchInstruction(), so using any of them fails with
-   * "Function ... not found". See KNOWN-GAPS.md.
+   * ChangeUI is a global-scope attribute and lives in 16-attributes.nsl. The
+   * address family - Call, GetCurrentAddress, GetFunctionAddress and
+   * GetLabelAddress - is in 06-functions.nsl, next to the calling convention
+   * they exist to work around.
    */
 }

@@ -72,23 +72,6 @@ to run in global context - so every spelling of the keyword fails:
 There is no way to write a section group. *Corpus:*
 [07-sections.nsl](07-sections.nsl) covers sections only.
 
-### Seven instructions are never dispatched
-
-`Call`, `ChangeUI`, `Exch`, `GetCurrentAddress`, `GetFunctionAddress`,
-`GetLabelAddress` and `Sleep` all have wrapper classes in
-[../src/nsl/instruction/](../src/nsl/instruction/) that nothing references from
-`Statement.matchInstruction()`. Using any of them fails with:
-
-```
-Function "GetFunctionAddress" not found that expects 1 parameters and returns 1 values.
-```
-
-This is the failure mode [CLAUDE.md](../CLAUDE.md) warns about when adding an
-instruction. It means indirect calls and `Sleep` have no spelling in nsL.
-
-*Corpus:* [06-functions.nsl](06-functions.nsl) and
-[17-inst-void.nsl](17-inst-void.nsl) name them where they would have gone.
-
 ### A loop or a nested switch inside a `switch`
 
 The first breakable construct inside a case leaves every later `break` in the

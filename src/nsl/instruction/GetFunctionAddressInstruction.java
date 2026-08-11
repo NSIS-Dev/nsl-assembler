@@ -16,6 +16,8 @@ import nsl.expression.*;
 public class GetFunctionAddressInstruction extends AssembleExpression {
 	public static final String name = "GetFunctionAddress";
 	private final Expression functionName;
+	private final int lineNo;
+	private final boolean inUninstaller;
 
 	/**
 	 * Class constructor.
@@ -31,6 +33,13 @@ public class GetFunctionAddressInstruction extends AssembleExpression {
 		if (paramsList.size() != 1) throw new NslArgumentException(name, 1);
 
 		this.functionName = paramsList.get(0);
+		if (!ExpressionType.isString(this.functionName))
+			throw new NslArgumentException(name, 1, ExpressionType.String);
+
+		this.lineNo = ScriptParser.tokenizer.lineno();
+		// Recorded here rather than read in assemble(): the flag tracks where the
+		// parser is, and by the time anything is written it has long been reset.
+		this.inUninstaller = Scope.inUninstaller();
 	}
 
 	/** Assembles the source code. */
@@ -46,8 +55,14 @@ public class GetFunctionAddressInstruction extends AssembleExpression {
 	 */
 	@Override
 	public void assemble(Register var) throws IOException {
-		Expression varOrFunctionName = AssembleExpression.getRegisterOrExpression(this.functionName);
-		ScriptParser.writeLine(name + " " + var + " " + varOrFunctionName);
-		varOrFunctionName.setInUse(false);
+		// Resolved here rather than in the constructor so that a function defined
+		// further down the script can have its address taken.
+		ScriptParser.writeLine(
+				name
+						+ " "
+						+ var
+						+ " "
+						+ FunctionInfo.resolveNsisName(
+								this.functionName.getStringValue(), this.inUninstaller, this.lineNo));
 	}
 }
