@@ -21,11 +21,12 @@ section Test()
   ($R0, $R1, $R2) = MultiReturnValue();
 
   // Macro that loops N times ($i = From; $i <= To; $i++) that inserts
-  // Call($i, Arg)
-  #macro MacroLoop(From, To, Call, Arg)
+  // Insert($i, Arg). The parameter cannot be named Call: instruction names are
+  // matched before macro parameters, so Call would be read as the instruction.
+  #macro MacroLoop(From, To, Insert, Arg)
     #if (From <= To)
-      eval(Call.'(From, Arg)');
-      MacroLoop(From + 1, To, Call, Arg);
+      eval(Insert.'(From, Arg)');
+      MacroLoop(From + 1, To, Insert, Arg);
     #endif
   #macroend
 
