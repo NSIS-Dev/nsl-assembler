@@ -67,6 +67,12 @@ section Test("operators")
   $5 = $R1 <=u $R0;
   DetailPrint($0." ".$1." ".$2." ".$3." ".$4." ".$5);
 
+  // Folded unsigned comparison: -1 is 0xFFFFFFFF, so it is above 5, and the
+  // negative define must still read back as -1 afterwards.
+  #define Negative -1
+  DetailPrint("fold >u = ".(Negative >u 5));
+  DetailPrint("Negative = ".Negative);
+
   $R2 = "Text";
   $0 = $R2 ==s "text";
   $1 = $R2 ==S "text";

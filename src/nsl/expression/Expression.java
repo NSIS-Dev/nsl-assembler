@@ -307,23 +307,21 @@ public class Expression {
 
 			// Integer types.
 			if (left.type.equals(ExpressionType.Integer) && right.type.equals(ExpressionType.Integer)) {
+				// Widen into locals: the operands may be the objects DefineList holds
+				// for a constant, and unsigned means reinterpreting the 32 bits, which
+				// only a wider type can hold.
+				long leftValue = left.integerValue, rightValue = right.integerValue;
 				if (comparisonType.equals(ComparisonType.IntegerUnsigned)) {
-					left.integerValue = Math.abs(left.integerValue);
-					right.integerValue = Math.abs(right.integerValue);
+					leftValue &= 0xFFFFFFFFL;
+					rightValue &= 0xFFFFFFFFL;
 				}
 
-				if (operator.equals("=="))
-					return Expression.fromBoolean(left.integerValue == right.integerValue);
-				if (operator.equals("!="))
-					return Expression.fromBoolean(left.integerValue != right.integerValue);
-				if (operator.equals(">"))
-					return Expression.fromBoolean(left.integerValue > right.integerValue);
-				if (operator.equals(">="))
-					return Expression.fromBoolean(left.integerValue >= right.integerValue);
-				if (operator.equals("<"))
-					return Expression.fromBoolean(left.integerValue < right.integerValue);
-				if (operator.equals("<="))
-					return Expression.fromBoolean(left.integerValue <= right.integerValue);
+				if (operator.equals("==")) return Expression.fromBoolean(leftValue == rightValue);
+				if (operator.equals("!=")) return Expression.fromBoolean(leftValue != rightValue);
+				if (operator.equals(">")) return Expression.fromBoolean(leftValue > rightValue);
+				if (operator.equals(">=")) return Expression.fromBoolean(leftValue >= rightValue);
+				if (operator.equals("<")) return Expression.fromBoolean(leftValue < rightValue);
+				if (operator.equals("<=")) return Expression.fromBoolean(leftValue <= rightValue);
 			}
 			// Boolean types.
 			else if (left.type.equals(ExpressionType.Boolean)
