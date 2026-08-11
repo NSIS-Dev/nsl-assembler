@@ -226,15 +226,23 @@ public class Tokenizer extends StreamTokenizer {
 				if (c >= '0' && c <= '9') {
 					this.ttype = TT_NUMBER;
 
+					// NSIS integers are DWORDs, so anything from 0x80000000 up is a
+					// valid literal that wraps to a negative int. Parse wide and
+					// narrow, rather than letting Integer.parseInt reject it.
+					long value;
 					try {
 						if (this.sval.length() > 1 && this.sval.startsWith("0x")) {
-							this.nval = Integer.parseInt(this.sval.substring(2), 16);
+							value = Long.parseLong(this.sval.substring(2), 16);
 						} else {
-							this.nval = Integer.parseInt(this.sval);
+							value = Long.parseLong(this.sval);
 						}
 					} catch (NumberFormatException ex) {
-						throw new NslException(ex.getMessage(), true);
+						throw new NslException("Invalid number \"" + this.sval + "\"", true);
 					}
+					if (value > 0xFFFFFFFFL)
+						throw new NslException(
+								"The number \"" + this.sval + "\" does not fit in 32 bits", true);
+					this.nval = (int) value;
 				}
 			}
 
