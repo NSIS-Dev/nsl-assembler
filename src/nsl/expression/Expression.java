@@ -523,6 +523,22 @@ public class Expression {
 	}
 
 	/**
+	 * Logically negates a Boolean expression.
+	 *
+	 * @param expression the expression to negate
+	 * @return the negated expression
+	 */
+	private static Expression negate(Expression expression) {
+		// A literal may be the object DefineList holds for a constant, so negating
+		// it in place would rewrite the constant for every later use of it. On an
+		// AssembleExpression booleanValue is the negate flag rather than a value,
+		// and there is nothing shared to protect.
+		if (expression.isLiteral()) return Expression.fromBoolean(!expression.booleanValue);
+		expression.booleanValue = !expression.booleanValue;
+		return expression;
+	}
+
+	/**
 	 * Matches a primary expression. This includes matching the Boolean NOT (!) operator and unary
 	 * negate (~) operator.
 	 *
@@ -553,8 +569,7 @@ public class Expression {
 
 					/*if (left instanceof ConditionalExpression)
 						((ConditionalExpression)left).setNegate(true);
-					else */ if (left.booleanValue) left.booleanValue = false;
-					else left.booleanValue = true;
+					else */ left = negate(left);
 				}
 				// Binary negate the returned expression.
 				else if (binaryNegate) {
@@ -585,8 +600,7 @@ public class Expression {
 			if (!left.type.equals(ExpressionType.Boolean))
 				throw new NslException("The \"!\" operator must be applied to a Boolean expression", true);
 
-			if (left.booleanValue) left.booleanValue = false;
-			else left.booleanValue = true;
+			left = negate(left);
 		}
 		// Binary negate the returned value.
 		else if (binaryNegate) {

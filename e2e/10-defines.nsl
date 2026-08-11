@@ -27,6 +27,11 @@ section Test("defines")
   DetailPrint("AString      = ".AString);
   DetailPrint("ABoolean     = ".ABoolean);
 
+  // "!" on a constant must not negate the stored value: $R1 is true.
+  $R0 = !ABoolean;
+  $R1 = ABoolean;
+  DetailPrint("!ABoolean    = ".$R0." then ".$R1);
+
   // --- Evaluated at substitution ---
 
   // A complete expression, deferred.
