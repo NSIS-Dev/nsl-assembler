@@ -8,6 +8,7 @@ import static org.junit.Assert.*;
 
 import java.io.StringReader;
 import nsl.expression.Expression;
+import nsl.expression.ReturnVarExpression;
 import nsl.statement.Statement;
 
 /**
@@ -69,6 +70,19 @@ public final class NslTestSupport {
 	}
 
 	/**
+	 * Installs an empty tokenizer as the current one, without pushing it onto the stack.
+	 *
+	 * <p>Needed by any test that provokes an {@link NslException} outside a parse: the message is
+	 * built from {@code ScriptParser.tokenizer.lineno()} regardless of where the error came from, so
+	 * with no current tokenizer the exception constructor throws a NullPointerException instead.
+	 */
+	public static void installTokenizer() {
+		Tokenizer tokenizer = new Tokenizer(new StringReader(""), SOURCE);
+		tokenizer.setAutoPop(false);
+		ScriptParser.tokenizer = tokenizer;
+	}
+
+	/**
 	 * Returns the assembler's global state to what a fresh JVM would hold. Call it from both
 	 * {@code @Before} and {@code @After} so that no test depends on the order the others ran in.
 	 *
@@ -83,6 +97,7 @@ public final class NslTestSupport {
 		ScriptParser.tokenizer = null;
 
 		RegisterList.setCurrent(new RegisterList());
+		ReturnVarExpression.setRegisters((java.util.ArrayList<Register>) null);
 		FunctionInfo.getList().clear();
 		Statement.getGlobal().clear();
 		Statement.getGlobalUninstaller().clear();
