@@ -110,6 +110,25 @@ section Test("operators")
   $3 = ($R0 == 1 || $R1 > 0) && $R0 == 1 && !($R1 == 4 || $R0 == 2);
   DetailPrint($0." ".$1." ".$2." ".$3);
 
+  // --- Short circuiting ---
+  //
+  // The dead operand is skipped rather than parsed, which is what lets a guard
+  // name a constant that does not exist. The skip counts parentheses so that a
+  // nested one does not end it early, and stops at whatever binds more loosely
+  // than the operator whose operand it is.
+  DetailPrint("skip nested  = ".(false && ($R0 == 1 || ($R0 == 2))));
+  DetailPrint("skip deep    = ".(true || (($R0 == 2) && ($R0 == 3))));
+  DetailPrint("skip string  = ".(false && ($R0 == "a)b")));
+  DetailPrint("skip comma   = ".toint(false && $R0 == 1, 7));
+  DetailPrint("skip ternary = ".(false && ($R0 == 1) ? "yes" : "no"));
+  $0 = false && $R0 == 1 || $R0 == 1;
+  DetailPrint("skip to ||   = ".$0);
+
+  // The idiom short circuiting exists for: the guarded operand cannot be
+  // parsed at all while the constant is missing.
+  DetailPrint("guard &&     = ".(defined(NEVER_DEFINED) && (NEVER_DEFINED == 1)));
+  DetailPrint("guard ||     = ".(!defined(NEVER_DEFINED) || (NEVER_DEFINED == 1)));
+
   // --- Concatenation ---
   $R0 = "one";
   $R1 = "two";

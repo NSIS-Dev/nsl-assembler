@@ -848,6 +848,33 @@ public class Expression {
 	}
 
 	/**
+	 * Skips the tokens of an operand that short circuiting has made dead, rather than parsing it: the
+	 * dead side of a && or || is allowed to name constants that do not exist, which is what makes
+	 * <code>defined(X) &amp;&amp; X == 1</code> work.
+	 *
+	 * <p>Parentheses opened inside the operand are counted, so what stops the skip is the token that
+	 * ends the enclosing expression rather than the first one that looks like it.
+	 *
+	 * @param stopChars the operators binding more loosely than the caller's, which therefore are not
+	 *     part of the operand. A closing parenthesis always stops the skip.
+	 */
+	private static void skipDeadOperand(String stopChars) {
+		int depth = 0;
+
+		while (true) {
+			if (ScriptParser.tokenizer.tokenIs('(')) depth++;
+			else if (ScriptParser.tokenizer.tokenIs(')')) {
+				if (depth == 0) break;
+				depth--;
+			} else if (depth == 0
+					&& ScriptParser.tokenizer.tokenIsChar()
+					&& stopChars.indexOf(ScriptParser.tokenizer.ttype) != -1) break;
+
+			if (!ScriptParser.tokenizer.tokenNext("\")\" or \";\"")) break;
+		}
+	}
+
+	/**
 	 * Matches a logical (Boolean) AND (&&) expression or a binary AND (&) expression.
 	 *
 	 * @return the expression
@@ -859,16 +886,9 @@ public class Expression {
 			// Match &&
 			if (ScriptParser.tokenizer.match('&')) {
 				if (ExpressionType.isBoolean(left) && left.booleanValue == false) {
-					// Evaluated to false; we need not evaluate anything up until the next
-					// ||, ) or ;.
-					while (ScriptParser.tokenizer.tokenNext("\")\"")) {
-						if (ScriptParser.tokenizer.tokenIs('('))
-							while (ScriptParser.tokenizer.tokenNext("\")\""))
-								if (ScriptParser.tokenizer.match(')')) break;
-						if (ScriptParser.tokenizer.tokenIs(')')
-								|| ScriptParser.tokenizer.tokenIs('|')
-								|| ScriptParser.tokenizer.tokenIs(';')) break;
-					}
+					// Evaluated to false; we need not evaluate the right operand. ^, | and the
+					// ternary ? all bind more loosely than &&, so they end it.
+					skipDeadOperand("^|?,;");
 				} else {
 					left = createBoolean(left, "&&", matchEqualityOrAssignment());
 				}
@@ -932,9 +952,9 @@ public class Expression {
 			// Match ||
 			if (ScriptParser.tokenizer.match('|')) {
 				if (ExpressionType.isBoolean(left) && left.booleanValue == true) {
-					// Evaluated to true; we can ignore the rest of the expression.
-					while (ScriptParser.tokenizer.tokenNext("\")\" or \";\""))
-						if (ScriptParser.tokenizer.tokenIs(')') || ScriptParser.tokenizer.tokenIs(';')) break;
+					// Evaluated to true; we need not evaluate the right operand. ^ binds more
+					// tightly than || and so is part of it; a binary | is not.
+					skipDeadOperand("|?,;");
 				} else {
 					left = createBoolean(left, "||", matchBinaryExclusiveOr());
 				}
