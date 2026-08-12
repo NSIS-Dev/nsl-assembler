@@ -99,13 +99,6 @@ $R3 = StrLen(ReadEnvStr("PATH"));
 
 *Pinned:* `ReturningInstructionTest.StrLen` asserts the temporary.
 
-### `toint()` cannot parse hexadecimal
-
-Documented to accept "a string literal of a decimal or hexadecimal
-representation". `toint("0xFF")` reaches `Integer.parseInt("0xFF", 16)`, which
-rejects the prefix, and `toint("FF")` is parsed as decimal. Both warn and
-return 0. The undocumented second parameter - a fallback value - does work.
-
 ### `length()` measures the escaped form
 
 `length("a\tb")` is 5, not 3: it counts the string after translation into NSIS
