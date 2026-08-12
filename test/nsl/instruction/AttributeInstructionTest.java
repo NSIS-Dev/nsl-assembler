@@ -305,20 +305,24 @@ public class AttributeInstructionTest {
 	}
 
 	/**
-	 * The size is emitted quoted because the wrapper validates it with isString, even though the
-	 * argument is a pixel count and the exception it raises on failure says "expects an integer".
-	 *
-	 * <p>Known bug, unfixed: AddBrandingImageInstruction checks {@code ExpressionType.isString} for
-	 * parameters 2 and 3 while passing {@code ExpressionType.Integer} to NslArgumentException, so
-	 * {@code AddBrandingImage("top", 32)} is rejected with a message describing what was in fact
-	 * supplied. NSIS accepts the quoted form, which is why nothing downstream notices. Pinned as it
-	 * stands; fixing the check turns this red.
+	 * The size is a pixel count, so an integer is the natural spelling. A string stays valid too,
+	 * because NSIS's dialog-unit suffix - "32u" - has nowhere else to live.
 	 */
 	@Test
 	public void AddBrandingImage() throws Exception {
 		assertThat(nsi, containsLine("AddBrandingImage \"top\" \"32\""));
-		Assembler.assembleExpectingError(
-				lines("Name(\"t\");", "OutFile(\"t.exe\");", "AddBrandingImage(\"top\", 32);"));
+		assertThat(
+				Assembler.assemble(
+						lines(
+								"Name(\"t\");",
+								"OutFile(\"t.exe\");",
+								"AddBrandingImage(\"top\", 32, 4);",
+								"",
+								"section Test(\"t\")",
+								"{",
+								"  DetailPrint(\"x\");",
+								"}")),
+				containsLine("AddBrandingImage \"top\" 32 4"));
 	}
 
 	@Test
