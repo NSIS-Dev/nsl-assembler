@@ -33,7 +33,7 @@ public class SwitchStatement extends Statement {
 		ScriptParser.tokenizer.matchOrDie('{');
 
 		// Set non-null values so that the block statement can contain break statements.
-		CodeInfo.getCurrent().setBreakLabel(RelativeJump.Zero);
+		Label parentBreak = CodeInfo.getCurrent().setBreakLabel(RelativeJump.Zero);
 
 		this.statementList = new ArrayList<Statement>();
 		this.casesList = new ArrayList<SwitchCaseStatement>();
@@ -77,7 +77,7 @@ public class SwitchStatement extends Statement {
 		if (noBreak)
 			throw new NslException("A \"switch\" statement must end with a \"break\" statement", true);
 
-		CodeInfo.getCurrent().setBreakLabel(null);
+		CodeInfo.getCurrent().setBreakLabel(parentBreak);
 
 		ScriptParser.tokenizer.matchOrDie('}');
 	}

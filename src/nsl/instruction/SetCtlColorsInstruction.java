@@ -16,7 +16,6 @@ import nsl.expression.*;
 public class SetCtlColorsInstruction extends AssembleExpression {
 	public static final String name = "SetCtlColors";
 	private final Expression hWnd;
-	private final Expression branding;
 	private final Expression textColor;
 	private final Expression bgColor;
 
@@ -32,51 +31,36 @@ public class SetCtlColorsInstruction extends AssembleExpression {
 
 		ArrayList<Expression> paramsList = Expression.matchList();
 		int paramsCount = paramsList.size();
-		if (paramsCount < 2 || paramsCount > 4) throw new NslArgumentException(name, 2, 4);
+		if (paramsCount < 2 || paramsCount > 3) throw new NslArgumentException(name, 2, 3);
 
 		this.hWnd = paramsList.get(0);
 
-		Expression textColorOrBranding = paramsList.get(1);
-		if (ExpressionType.isBoolean(textColorOrBranding)) {
-			this.branding = textColorOrBranding;
+		this.textColor = paramsList.get(1);
+		if (!ExpressionType.isString(this.textColor))
+			throw new NslArgumentException(name, 2, ExpressionType.String);
 
-			if (paramsCount > 2) {
-				this.bgColor = paramsList.get(2);
-				if (!ExpressionType.isString(this.bgColor))
-					throw new NslArgumentException(name, 3, ExpressionType.String);
-
-				if (paramsCount > 3) {
-					this.textColor = paramsList.get(3);
-					if (!ExpressionType.isString(this.textColor))
-						throw new NslArgumentException(name, 4, ExpressionType.String);
-				} else {
-					this.textColor = null;
-				}
-			} else {
-				this.bgColor = null;
-				this.textColor = null;
-			}
-		} else {
-			this.branding = null;
-
-			this.textColor = textColorOrBranding;
-			if (!ExpressionType.isString(this.textColor))
-				throw new NslArgumentException(name, 2, ExpressionType.String);
-
-			if (paramsCount > 2) {
-				this.bgColor = paramsList.get(2);
-				if (!ExpressionType.isString(this.bgColor))
-					throw new NslArgumentException(name, 3, ExpressionType.String);
-			} else {
-				this.bgColor = null;
-			}
-		}
+		if (paramsCount > 2) {
+			this.bgColor = paramsList.get(2);
+			if (!ExpressionType.isString(this.bgColor))
+				throw new NslArgumentException(name, 3, ExpressionType.String);
+		} else this.bgColor = null;
 	}
 
 	/** Assembles the source code. */
 	@Override
 	public void assemble() throws IOException {
-		throw new UnsupportedOperationException("Not supported.");
+		Expression varOrHWnd = AssembleExpression.getRegisterOrExpression(this.hWnd);
+
+		AssembleExpression.assembleIfRequired(this.textColor);
+		String write = name + " " + varOrHWnd + " " + this.textColor;
+
+		if (this.bgColor != null) {
+			AssembleExpression.assembleIfRequired(this.bgColor);
+			write += " " + this.bgColor;
+		}
+
+		ScriptParser.writeLine(write);
+		varOrHWnd.setInUse(false);
 	}
 
 	/**
@@ -86,25 +70,6 @@ public class SetCtlColorsInstruction extends AssembleExpression {
 	 */
 	@Override
 	public void assemble(Register var) throws IOException {
-		Expression varOrFile = AssembleExpression.getRegisterOrExpression(this.hWnd);
-		String write = name + " " + var + " " + varOrFile;
-
-		if (this.branding != null) {
-			AssembleExpression.assembleIfRequired(this.branding);
-			if (this.branding.getBooleanValue() == true) write += " /BRANDING";
-		}
-
-		if (this.textColor != null) {
-			AssembleExpression.assembleIfRequired(this.textColor);
-			write += " " + this.textColor;
-
-			if (this.bgColor != null) {
-				AssembleExpression.assembleIfRequired(this.bgColor);
-				write += " " + this.bgColor;
-			}
-		}
-
-		ScriptParser.writeLine(write);
-		varOrFile.setInUse(false);
+		throw new UnsupportedOperationException("Not supported.");
 	}
 }

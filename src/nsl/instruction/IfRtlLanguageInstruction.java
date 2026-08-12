@@ -1,5 +1,5 @@
 /*
- * StrCmpSInstruction.java
+ * IfRtlLanguageInstruction.java
  */
 
 package nsl.instruction;
@@ -12,38 +12,25 @@ import nsl.expression.*;
 import nsl.statement.SwitchCaseStatement;
 
 /**
- * @author Stuart
+ * The NSIS IfRtlLanguage instruction.
+ *
+ * @author Jan
  */
-public class StrCmpSInstruction extends JumpExpression {
-	public static final String name = "StrCmpS";
-
-	private final Expression str1;
-	private final Expression str2;
+public class IfRtlLanguageInstruction extends JumpExpression {
+	public static final String name = "RtlLanguage";
 
 	/**
 	 * Class constructor.
 	 *
 	 * @param returns the number of return values
 	 */
-	public StrCmpSInstruction(int returns) {
-		if (PageExInfo.in())
-			throw new NslContextException(
-					EnumSet.of(NslContext.Section, NslContext.Function, NslContext.Global), name);
+	public IfRtlLanguageInstruction(int returns) {
+		if (!SectionInfo.in() && !FunctionInfo.in())
+			throw new NslContextException(EnumSet.of(NslContext.Section, NslContext.Function), name);
 		if (returns != 1) throw new NslReturnValueException(name, 1);
 
 		ArrayList<Expression> paramsList = Expression.matchList();
-		if (paramsList.size() != 2) throw new NslArgumentException(name, 2);
-
-		this.str1 = paramsList.get(0);
-		this.str2 = paramsList.get(1);
-
-		if (this.str1.isLiteral()
-				&& !this.str1.getType().equals(ExpressionType.Register)
-				&& this.str2.isLiteral()
-				&& !this.str2.getType().equals(ExpressionType.Register))
-			throw new NslException(
-					"\"StrCmpS\" instruction used with literals for both arguments; use the \"==S\" or \"!=S\" equality operators instead",
-					true);
+		if (!paramsList.isEmpty()) throw new NslArgumentException(name, 0);
 
 		this.type = ExpressionType.Boolean;
 		this.booleanValue = true;
@@ -65,16 +52,11 @@ public class StrCmpSInstruction extends JumpExpression {
 		if (this.thrownAwayAfterOptimise != null)
 			AssembleExpression.assembleIfRequired(this.thrownAwayAfterOptimise);
 
-		Expression varOrStr1 = AssembleExpression.getRegisterOrExpression(this.str1);
-		Expression varOrStr2 = AssembleExpression.getRegisterOrExpression(this.str2);
-		if (this.booleanValue)
-			ScriptParser.writeLine(name + " " + varOrStr1 + " " + varOrStr2 + " 0 +3");
-		else ScriptParser.writeLine(name + " " + varOrStr1 + " " + varOrStr2 + " +3");
+		if (this.booleanValue) ScriptParser.writeLine("IfRtlLanguage 0 +3");
+		else ScriptParser.writeLine("IfRtlLanguage +3");
 		ScriptParser.writeLine("StrCpy " + var + " true");
 		ScriptParser.writeLine("Goto +2");
 		ScriptParser.writeLine("StrCpy " + var + " false");
-		varOrStr1.setInUse(false);
-		varOrStr2.setInUse(false);
 	}
 
 	/**
@@ -88,14 +70,8 @@ public class StrCmpSInstruction extends JumpExpression {
 		if (this.thrownAwayAfterOptimise != null)
 			AssembleExpression.assembleIfRequired(this.thrownAwayAfterOptimise);
 
-		Expression varOrStr1 = AssembleExpression.getRegisterOrExpression(this.str1);
-		Expression varOrStr2 = AssembleExpression.getRegisterOrExpression(this.str2);
-		if (this.booleanValue == true)
-			ScriptParser.writeLine(name + " " + varOrStr1 + " " + varOrStr2 + " " + gotoA + " " + gotoB);
-		else
-			ScriptParser.writeLine(name + " " + varOrStr1 + " " + varOrStr2 + " " + gotoB + " " + gotoA);
-		varOrStr1.setInUse(false);
-		varOrStr2.setInUse(false);
+		if (this.booleanValue == true) ScriptParser.writeLine("IfRtlLanguage " + gotoA + " " + gotoB);
+		else ScriptParser.writeLine("IfRtlLanguage " + gotoB + " " + gotoA);
 	}
 
 	/**
@@ -121,6 +97,6 @@ public class StrCmpSInstruction extends JumpExpression {
 
 		if (gotoA.isEmpty()) gotoA = " 0";
 
-		ScriptParser.writeLine(name + gotoA + gotoB);
+		ScriptParser.writeLine("IfRtlLanguage" + gotoA + gotoB);
 	}
 }

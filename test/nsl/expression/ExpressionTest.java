@@ -4,6 +4,7 @@
 
 package nsl.expression;
 
+import static nsl.NslTestSupport.evaluate;
 import static org.junit.Assert.*;
 
 import java.io.OutputStreamWriter;
@@ -147,19 +148,6 @@ public class ExpressionTest {
 		System.out.println("  " + (booleanValue = Expression.matchComplex().getBooleanValue()));
 		assertEquals(true == false || false != true || true == false && false != true, booleanValue);
 		ScriptParser.tokenizer.matchEolOrDie();
-	}
-
-	/**
-	 * Assembles a single expression and returns its value as a string. Every call leaves the
-	 * tokenizer stack as it found it.
-	 */
-	private static String evaluate(String expression) {
-		ScriptParser.pushTokenizer(new Tokenizer(new StringReader(expression), "ExpressionTest"));
-		try {
-			return Expression.matchComplex().toString();
-		} finally {
-			ScriptParser.popTokenizer();
-		}
 	}
 
 	/** Test of the format() assemble time function, of class Expression. */

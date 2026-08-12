@@ -41,6 +41,25 @@ section Test("boolean instructions")
   if (AbortCalled())
     DetailPrint("bool: AbortCalled");
 
+  // Whether SetRegView put the registry into the non-native view. Toggled here
+  // so both arms are reachable rather than folded away by the 32/64 default.
+  SetRegView("64");
+  if (AltRegView())
+    DetailPrint("bool: alternate registry view");
+  SetRegView("default");
+
+  // Whether the current language reads right to left. Depends on the language
+  // selected at runtime, so both arms have to be reachable.
+  if (RtlLanguage())
+    DetailPrint("bool: right-to-left language");
+
+  // Toggled the same way, so the true arm is not dead under the default
+  // per-user context.
+  SetShellVarContext("all");
+  if (ShellVarContextAll())
+    DetailPrint("bool: all-users shell var context");
+  SetShellVarContext("current");
+
   // --- Negated ---
 
   if (!Errors())
@@ -53,7 +72,10 @@ section Test("boolean instructions")
   $R2 = Silent();
   $R3 = RebootFlag();
   $R4 = IsWindow($HWNDPARENT);
-  DetailPrint("bool: ".$R0." ".$R1." ".$R2." ".$R3." ".$R4);
+  $R7 = AltRegView();
+  $R8 = RtlLanguage();
+  $R9 = ShellVarContextAll();
+  DetailPrint("bool: ".$R0." ".$R1." ".$R2." ".$R3." ".$R4." ".$R7." ".$R8." ".$R9);
 
   // --- In compound conditions, where the jumps have to be threaded together ---
 
@@ -65,6 +87,15 @@ section Test("boolean instructions")
 
   if ((Silent() || RebootFlag()) && FileExists($EXEDIR) && !Errors())
     DetailPrint("bool: nested");
+
+  if (!AltRegView() && !Errors())
+    DetailPrint("bool: negated AltRegView");
+
+  if (!RtlLanguage() || Silent())
+    DetailPrint("bool: negated RtlLanguage");
+
+  if (!ShellVarContextAll() && !Silent())
+    DetailPrint("bool: negated ShellVarContextAll");
 
   // --- Compared against a literal ---
 

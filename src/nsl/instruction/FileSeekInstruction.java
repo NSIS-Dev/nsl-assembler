@@ -73,10 +73,11 @@ public class FileSeekInstruction extends AssembleExpression {
 		AssembleExpression.assembleIfRequired(this.handle);
 		Expression varOrOffset = AssembleExpression.getRegisterOrExpression(this.offset);
 		if (this.mode == null) {
-			ScriptParser.writeLine(name + " " + this.handle + " " + varOrOffset + var);
+			ScriptParser.writeLine(name + " " + this.handle + " " + varOrOffset + " " + var);
 		} else {
 			AssembleExpression.assembleIfRequired(this.mode);
-			ScriptParser.writeLine(name + " " + this.handle + " " + varOrOffset + " " + this.mode + var);
+			ScriptParser.writeLine(
+					name + " " + this.handle + " " + varOrOffset + " " + this.mode + " " + var);
 		}
 		varOrOffset.setInUse(false);
 	}

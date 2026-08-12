@@ -37,14 +37,16 @@ public class AddBrandingImageInstruction extends AssembleExpression {
 		if (!ExpressionType.isString(this.position))
 			throw new NslArgumentException(name, 1, ExpressionType.String);
 
+		// A string is allowed alongside the integer so that NSIS's dialog-unit suffix, as in "32u",
+		// can still be written.
 		this.size = paramsList.get(1);
-		if (!ExpressionType.isString(this.size))
-			throw new NslArgumentException(name, 2, ExpressionType.Integer);
+		if (!ExpressionType.isInteger(this.size) && !ExpressionType.isString(this.size))
+			throw new NslArgumentException(name, 2, ExpressionType.Integer, ExpressionType.String);
 
 		if (paramsCount > 2) {
 			this.padding = paramsList.get(2);
-			if (!ExpressionType.isString(this.padding))
-				throw new NslArgumentException(name, 3, ExpressionType.Integer);
+			if (!ExpressionType.isInteger(this.padding) && !ExpressionType.isString(this.padding))
+				throw new NslArgumentException(name, 3, ExpressionType.Integer, ExpressionType.String);
 		} else this.padding = null;
 	}
 

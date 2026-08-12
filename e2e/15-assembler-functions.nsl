@@ -17,16 +17,24 @@ section Test("assembler functions")
   /*
    * --- toint(): every accepted argument shape ---
    *
-   * The documented hexadecimal string form is absent, because it does not work
-   * in either spelling: toint("0xFF") reaches Integer.parseInt("0xFF", 16),
-   * which rejects the prefix, and toint("FF") is parsed as decimal. Both warn
-   * and return 0. See KNOWN-GAPS.md.
+   * A string is read with the same spellings a number written into the source
+   * has: decimal, or hexadecimal behind an "0x" prefix, either optionally
+   * signed. A bare "FF" is not hexadecimal - it would make "11" ambiguous.
    *
    * The optional second argument is the value to fall back to when the
    * conversion fails; it is undocumented but works.
    */
   DetailPrint("toint decimal string = ".toint("255"));
+  DetailPrint("toint hex string     = ".toint("0xFF"));
+  DetailPrint("toint negative hex   = ".toint("-0x10"));
+
+  // NSIS integers are DWORDs, so the top half of the range wraps negative -
+  // the same value the literal 0xFFFFFFFF assembles to.
+  DetailPrint("toint 0xFFFFFFFF     = ".toint("0xFFFFFFFF"));
+
   DetailPrint("toint with a default = ".toint("not a number", -1));
+  DetailPrint("toint bare hex       = ".toint("FF", -1));
+  DetailPrint("toint out of range   = ".toint("0x1FFFFFFFF", -1));
   DetailPrint("toint true           = ".toint(true));
   DetailPrint("toint false          = ".toint(false));
   DetailPrint("toint integer        = ".toint(42));

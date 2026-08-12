@@ -101,7 +101,17 @@ For unsigned integer comparisons, place a lower case “u” after the operator.
     $0 = $R0 ==S “str”; // Is the same as:
     $0 = StrCmpS($R0, “str”);
 
+Without a suffix, an operand is compared as a signed integer, except when one side is a string literal that cannot be read as a number — then a case insensitive string comparison is used, since comparing it as an integer would read it as zero. A literal that does look like a number, such as `“42”` or `“0x2A”`, still compares numerically, and an explicit suffix always takes precedence:
+
+    $0 = $R0 == “str”;   // Compares as a string
+    $0 = $R0 == “42”;    // Compares as an integer
+    $0 = $R0 ==u “str”;  // Compares as an unsigned integer, as asked
+
 Note that the assembler will evaluate all expressions to the fullest extent possible at assemble time. The expression `9 + 9` will be replaced with the value of `18`. Similarly `true` && `false` will evaluate to false.
+
+When one side of a `&&` or a `||` settles the result at assemble time, the other side is skipped without being read as an expression at all. That is what allows a guard to mention a constant that may not exist:
+
+    $0 = defined(MyConst) && MyConst == 1;
 
 #### Assignment
 
@@ -187,6 +197,20 @@ Functions can be overloaded in nsL, that is, you can have multiple functions of 
 Uninstall functions (for the uninstall executable) must have the `uninstall` keyword:
  
     uninstall function myFunc() { … }
+
+#### Function addresses and indirect calls
+
+`myFunc(…)` is the normal way to call a function: it passes the arguments and collects the return values for you. `GetFunctionAddress` and `Call` are the indirect form, for when a plug-in or a callback needs an address rather than a call:
+
+    $R0 = GetFunctionAddress(“myFunc”);
+    Call($R0);      // calls through the address
+    Call(“myFunc”); // calls by name
+
+Both take the name exactly as it was written in the source. The assembler resolves it to the name NSIS knows the function by, which is not always the same thing: a function that takes arguments or returns values is emitted under a mangled name so that overloads can coexist, and an uninstall function is emitted with an `un.` prefix. Because there is no argument list to resolve an overload against, taking the address of an overloaded function is an error.
+
+Neither form passes arguments or return values, so a function reached this way has to leave the stack as it found it.
+
+`GetCurrentAddress` gives the address of the instruction it appears on, and `GetLabelAddress` the address of a label. nsL generates its own labels and has no syntax for declaring one, so the only label the latter can name is one written in a `#nsis` block.
 
 #### NSIS functions
 
@@ -441,7 +465,7 @@ When used on the right hand side of an assignment operator (`=`, `+=` etc.), ret
 #### toint(literal)
 This converts the given literal argument to an integer literal. The argument can be:
 
-* A string literal of a decimal or hexadecimal representation of an integer, of which is parsed.
+* A string literal of a decimal or hexadecimal representation of an integer, of which is parsed. Hexadecimal needs the `0x` prefix, exactly as a number written directly into the source does; either form may be signed. Values from `0x80000000` up wrap to a negative integer, since NSIS integers are DWORDs.
 
 * A Boolean literal, which is translated to 1 for `true` or 0 for `false`.
 

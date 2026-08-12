@@ -22,13 +22,13 @@ public class DoStatement extends Statement {
 			throw new NslContextException(EnumSet.of(NslContext.Section, NslContext.Function), "do");
 
 		// Set non-null values so that the block statement can contain break or continue statements.
-		CodeInfo.getCurrent().setBreakLabel(RelativeJump.Zero);
-		CodeInfo.getCurrent().setContinueLabel(RelativeJump.Zero);
+		Label parentBreak = CodeInfo.getCurrent().setBreakLabel(RelativeJump.Zero);
+		Label parentContinue = CodeInfo.getCurrent().setContinueLabel(RelativeJump.Zero);
 
 		this.blockStatement = new BlockStatement();
 
-		CodeInfo.getCurrent().setBreakLabel(null);
-		CodeInfo.getCurrent().setContinueLabel(null);
+		CodeInfo.getCurrent().setBreakLabel(parentBreak);
+		CodeInfo.getCurrent().setContinueLabel(parentContinue);
 
 		ScriptParser.tokenizer.matchOrDie("while");
 		ScriptParser.tokenizer.matchOrDie('(');

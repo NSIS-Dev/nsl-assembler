@@ -27,6 +27,11 @@ section Test("defines")
   DetailPrint("AString      = ".AString);
   DetailPrint("ABoolean     = ".ABoolean);
 
+  // "!" on a constant must not negate the stored value: $R1 is true.
+  $R0 = !ABoolean;
+  $R1 = ABoolean;
+  DetailPrint("!ABoolean    = ".$R0." then ".$R1);
+
   // --- Evaluated at substitution ---
 
   // A complete expression, deferred.
@@ -43,12 +48,14 @@ section Test("defines")
   #define Left 5
   #define Op `>`
   #define Right 6
-  #define Call `DetailPrint`
+  // Not named Call: instruction names are matched before constants are looked
+  // up, so a constant sharing one is shadowed by the instruction.
+  #define Emit `DetailPrint`
   #define Arg "constants can hold anything"
   if (Left Op Right)
     DetailPrint("unreachable");
   else
-    Call(Arg);
+    Emit(Arg);
 
   // Building a value by concatenation.
   #define PartOne 'Hello, '

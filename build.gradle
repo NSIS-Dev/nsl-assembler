@@ -56,6 +56,11 @@ sourceSets {
 
 // Configure test output
 test {
+	// Codegen tests fork the assembler rather than calling it in process, so they
+	// need the jar built first and need to be told where it landed.
+	dependsOn jar
+	systemProperty 'nsl.jar', jar.archiveFile.get().asFile.absolutePath
+
 	testLogging {
 		events "passed", "skipped", "failed"
 		exceptionFormat "full"

@@ -83,6 +83,9 @@ public abstract class Statement {
 			return new CaptionInstruction(returns);
 		if (ScriptParser.tokenizer.match(CallInstDLLInstruction.name))
 			return new CallInstDLLInstruction(returns);
+		if (ScriptParser.tokenizer.match(CallInstruction.name)) return new CallInstruction(returns);
+		if (ScriptParser.tokenizer.match(ChangeUIInstruction.name))
+			return new ChangeUIInstruction(returns);
 		if (ScriptParser.tokenizer.match(CheckBitmapInstruction.name))
 			return new CheckBitmapInstruction(returns);
 		if (ScriptParser.tokenizer.match(ClearErrorsInstruction.name))
@@ -127,6 +130,7 @@ public abstract class Statement {
 			return new EnumRegKeyInstruction(returns);
 		if (ScriptParser.tokenizer.match(EnumRegValueInstruction.name))
 			return new EnumRegValueInstruction(returns);
+		if (ScriptParser.tokenizer.match(ExchInstruction.name)) return new ExchInstruction(returns);
 		if (ScriptParser.tokenizer.match(ExecInstruction.name)) return new ExecInstruction(returns);
 		if (ScriptParser.tokenizer.match(ExecShellInstruction.name))
 			return new ExecShellInstruction(returns);
@@ -177,6 +181,8 @@ public abstract class Statement {
 			return new FlushINIInstruction(returns);
 		if (ScriptParser.tokenizer.match(GetCurInstTypeInstruction.name))
 			return new GetCurInstTypeInstruction(returns);
+		if (ScriptParser.tokenizer.match(GetCurrentAddressInstruction.name))
+			return new GetCurrentAddressInstruction(returns);
 		if (ScriptParser.tokenizer.match(GetDlgItemInstruction.name))
 			return new GetDlgItemInstruction(returns);
 		if (ScriptParser.tokenizer.match(GetDLLVersionInstruction.name))
@@ -189,10 +195,16 @@ public abstract class Statement {
 			return new GetFileTimeInstruction(returns);
 		if (ScriptParser.tokenizer.match(GetFileTimeLocalInstruction.name))
 			return new GetFileTimeLocalInstruction(returns);
+		if (ScriptParser.tokenizer.match(GetFullPathNameInstruction.name))
+			return new GetFullPathNameInstruction(returns);
+		if (ScriptParser.tokenizer.match(GetFunctionAddressInstruction.name))
+			return new GetFunctionAddressInstruction(returns);
 		if (ScriptParser.tokenizer.match(GetInstDirErrorInstruction.name))
 			return new GetInstDirErrorInstruction(returns);
 		if (ScriptParser.tokenizer.match(GetKnownFolderPathInstruction.name))
 			return new GetKnownFolderPathInstruction(returns);
+		if (ScriptParser.tokenizer.match(GetLabelAddressInstruction.name))
+			return new GetLabelAddressInstruction(returns);
 		if (ScriptParser.tokenizer.match(GetRegViewInstruction.name))
 			return new GetRegViewInstruction(returns);
 		if (ScriptParser.tokenizer.match(GetShellVarContextInstruction.name))
@@ -206,12 +218,18 @@ public abstract class Statement {
 		if (ScriptParser.tokenizer.match(IconInstruction.name)) return new IconInstruction(returns);
 		if (ScriptParser.tokenizer.match(IfAbortInstruction.name))
 			return new IfAbortInstruction(returns);
+		if (ScriptParser.tokenizer.match(IfAltRegViewInstruction.name))
+			return new IfAltRegViewInstruction(returns);
 		if (ScriptParser.tokenizer.match(IfErrorsInstruction.name))
 			return new IfErrorsInstruction(returns);
 		if (ScriptParser.tokenizer.match(IfFileExistsInstruction.name))
 			return new IfFileExistsInstruction(returns);
 		if (ScriptParser.tokenizer.match(IfRebootFlagInstruction.name))
 			return new IfRebootFlagInstruction(returns);
+		if (ScriptParser.tokenizer.match(IfRtlLanguageInstruction.name))
+			return new IfRtlLanguageInstruction(returns);
+		if (ScriptParser.tokenizer.match(IfShellVarContextAllInstruction.name))
+			return new IfShellVarContextAllInstruction(returns);
 		if (ScriptParser.tokenizer.match(IfSilentInstruction.name))
 			return new IfSilentInstruction(returns);
 		if (ScriptParser.tokenizer.match(InitPluginsDirInstruction.name))
@@ -232,7 +250,11 @@ public abstract class Statement {
 			return new InstTypeInstruction(returns);
 		if (ScriptParser.tokenizer.match(InstTypeSetTextInstruction.name))
 			return new InstTypeSetTextInstruction(returns);
+		if (ScriptParser.tokenizer.match(Int64FmtInstruction.name))
+			return new Int64FmtInstruction(returns);
 		if (ScriptParser.tokenizer.match(IntFmtInstruction.name)) return new IntFmtInstruction(returns);
+		if (ScriptParser.tokenizer.match(IntPtrOpInstruction.name))
+			return new IntPtrOpInstruction(returns);
 		if (ScriptParser.tokenizer.match(IsWindowInstruction.name))
 			return new IsWindowInstruction(returns);
 		if (ScriptParser.tokenizer.match(LangStringInstruction.name))
@@ -258,12 +280,16 @@ public abstract class Statement {
 			return new ManifestAppendCustomStringInstruction(returns);
 		if (ScriptParser.tokenizer.match(ManifestDPIAwareInstruction.name))
 			return new ManifestDPIAwareInstruction(returns);
+		if (ScriptParser.tokenizer.match(ManifestDPIAwarenessInstruction.name))
+			return new ManifestDPIAwarenessInstruction(returns);
 		if (ScriptParser.tokenizer.match(ManifestDisableWindowFilteringInstruction.name))
 			return new ManifestDisableWindowFilteringInstruction(returns);
 		if (ScriptParser.tokenizer.match(ManifestGdiScalingInstruction.name))
 			return new ManifestGdiScalingInstruction(returns);
 		if (ScriptParser.tokenizer.match(ManifestLongPathAwareInstruction.name))
 			return new ManifestLongPathAwareInstruction(returns);
+		if (ScriptParser.tokenizer.match(ManifestMaxVersionTestedInstruction.name))
+			return new ManifestMaxVersionTestedInstruction(returns);
 		if (ScriptParser.tokenizer.match(ManifestSupportedOSInstruction.name))
 			return new ManifestSupportedOSInstruction(returns);
 		if (ScriptParser.tokenizer.match(MessageBoxInstruction.name))
@@ -271,6 +297,15 @@ public abstract class Statement {
 		if (ScriptParser.tokenizer.match(MiscButtonTextInstruction.name))
 			return new MiscButtonTextInstruction(returns);
 		if (ScriptParser.tokenizer.match(NameInstruction.name)) return new NameInstruction(returns);
+		if (ScriptParser.tokenizer.match(NopInstruction.name)) return new NopInstruction(returns);
+		if (ScriptParser.tokenizer.match(PEAddResourceInstruction.name))
+			return new PEAddResourceInstruction(returns);
+		if (ScriptParser.tokenizer.match(PEDllCharacteristicsInstruction.name))
+			return new PEDllCharacteristicsInstruction(returns);
+		if (ScriptParser.tokenizer.match(PERemoveResourceInstruction.name))
+			return new PERemoveResourceInstruction(returns);
+		if (ScriptParser.tokenizer.match(PESubsysVerInstruction.name))
+			return new PESubsysVerInstruction(returns);
 		if (ScriptParser.tokenizer.match(PopInstruction.name)) return new PopInstruction(returns);
 		if (ScriptParser.tokenizer.match(PushInstruction.name)) return new PushInstruction(returns);
 		if (ScriptParser.tokenizer.match(OutFileInstruction.name))
@@ -280,6 +315,8 @@ public abstract class Statement {
 			return new ReadEnvStrInstruction(returns);
 		if (ScriptParser.tokenizer.match(ReadINIStrInstruction.name))
 			return new ReadINIStrInstruction(returns);
+		if (ScriptParser.tokenizer.match(ReadMemoryInstruction.name))
+			return new ReadMemoryInstruction(returns);
 		if (ScriptParser.tokenizer.match(ReadRegDWORDInstruction.name))
 			return new ReadRegDWORDInstruction(returns);
 		if (ScriptParser.tokenizer.match(ReadRegStrInstruction.name))
@@ -332,6 +369,8 @@ public abstract class Statement {
 			return new SetCompressorInstruction(returns);
 		if (ScriptParser.tokenizer.match(SetCtlColorsInstruction.name))
 			return new SetCtlColorsInstruction(returns);
+		if (ScriptParser.tokenizer.match(SetCtlColorsBrandingInstruction.name))
+			return new SetCtlColorsBrandingInstruction(returns);
 		if (ScriptParser.tokenizer.match(SetCurInstTypeInstruction.name))
 			return new SetCurInstTypeInstruction(returns);
 		if (ScriptParser.tokenizer.match(SetDatablockOptimizeInstruction.name))
@@ -354,6 +393,8 @@ public abstract class Statement {
 			return new SetOverwriteInstruction(returns);
 		if (ScriptParser.tokenizer.match(SetOutPathInstruction.name))
 			return new SetOutPathInstruction(returns);
+		if (ScriptParser.tokenizer.match(SetPluginUnloadInstruction.name))
+			return new SetPluginUnloadInstruction(returns);
 		if (ScriptParser.tokenizer.match(SetRebootFlagInstruction.name))
 			return new SetRebootFlagInstruction(returns);
 		if (ScriptParser.tokenizer.match(SetRegViewInstruction.name))
@@ -372,6 +413,7 @@ public abstract class Statement {
 			return new SilentInstallInstruction(returns);
 		if (ScriptParser.tokenizer.match(SilentUninstallInstruction.name))
 			return new SilentUninstallInstruction(returns);
+		if (ScriptParser.tokenizer.match(SleepInstruction.name)) return new SleepInstruction(returns);
 		if (ScriptParser.tokenizer.match(SpaceTextsInstruction.name))
 			return new SpaceTextsInstruction(returns);
 		if (ScriptParser.tokenizer.match(StrCpyInstruction.name)) return new StrCpyInstruction(returns);
@@ -397,6 +439,8 @@ public abstract class Statement {
 			return new UnsafeStrCpyInstruction(returns);
 		if (ScriptParser.tokenizer.match(VIAddVersionKeyInstruction.name))
 			return new VIAddVersionKeyInstruction(returns);
+		if (ScriptParser.tokenizer.match(VIFileVersionInstruction.name))
+			return new VIFileVersionInstruction(returns);
 		if (ScriptParser.tokenizer.match(VIProductVersionInstruction.name))
 			return new VIProductVersionInstruction(returns);
 		if (ScriptParser.tokenizer.match(WindowIconInstruction.name))

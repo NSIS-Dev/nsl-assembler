@@ -9,6 +9,11 @@ are deliberate and reviewable rather than silent, and so that a fix has a test
 waiting for it: removing the workaround in the named file is the regression
 test.
 
+Several are now also pinned in [test/](../test), which assembles in a
+subprocess and never runs `makensis`, so it can cover things the corpus cannot
+reach. Where a gap has a unit test standing on it, the entry names it: fixing
+the gap turns that test red, which is the reminder to come back here.
+
 ---
 
 ## Assembler crashes
@@ -31,14 +36,6 @@ parameters and returns a value cannot be called for its side effects alone.
 
 *Corpus:* [06-functions.nsl](06-functions.nsl) assigns the result even where
 nothing needs it.
-
-### `SetCtlColors` and `SetBrandingImage` cannot be called
-
-Both reject being given a return variable and then throw
-`UnsupportedOperationException` from the statement form, so there is no way to
-write either of them.
-
-*Corpus:* not used; [23-inst-ui.nsl](23-inst-ui.nsl) says why.
 
 ---
 
@@ -72,44 +69,6 @@ to run in global context - so every spelling of the keyword fails:
 There is no way to write a section group. *Corpus:*
 [07-sections.nsl](07-sections.nsl) covers sections only.
 
-### Seven instructions are never dispatched
-
-`Call`, `ChangeUI`, `Exch`, `GetCurrentAddress`, `GetFunctionAddress`,
-`GetLabelAddress` and `Sleep` all have wrapper classes in
-[../src/nsl/instruction/](../src/nsl/instruction/) that nothing references from
-`Statement.matchInstruction()`. Using any of them fails with:
-
-```
-Function "GetFunctionAddress" not found that expects 1 parameters and returns 1 values.
-```
-
-This is the failure mode [CLAUDE.md](../CLAUDE.md) warns about when adding an
-instruction. It means indirect calls and `Sleep` have no spelling in nsL.
-
-*Corpus:* [06-functions.nsl](06-functions.nsl) and
-[17-inst-void.nsl](17-inst-void.nsl) name them where they would have gone.
-
-### A loop or a nested switch inside a `switch`
-
-The first breakable construct inside a case leaves every later `break` in the
-enclosing switch rejected:
-
-```nsl
-switch ($R0)
-{
-  case 1:
-    $i = 0;
-    while ($i < 2) { $i++; }
-  default:
-    DetailPrint("d");
-    break;              // The "break" statement cannot be used here.
-}
-```
-
-The assembler separately insists a switch end with a `break`, so no arrangement
-of the two assembles. *Corpus:* [05-switch.nsl](05-switch.nsl) keeps case bodies
-flat and says so.
-
 ---
 
 ## Smaller things
@@ -129,12 +88,7 @@ assembler function instead". Its argument has to be a nested instruction call:
 $R3 = StrLen(ReadEnvStr("PATH"));
 ```
 
-### `toint()` cannot parse hexadecimal
-
-Documented to accept "a string literal of a decimal or hexadecimal
-representation". `toint("0xFF")` reaches `Integer.parseInt("0xFF", 16)`, which
-rejects the prefix, and `toint("FF")` is parsed as decimal. Both warn and
-return 0. The undocumented second parameter - a fallback value - does work.
+*Pinned:* `ReturningInstructionTest.StrLen` asserts the temporary.
 
 ### `length()` measures the escaped form
 
@@ -155,7 +109,10 @@ equivalent and folds the same way.
 
 Both list `NslContext.Global` as valid, but NSIS rejects them anywhere except
 inside a `PageEx`. *Corpus:* [16-attributes.nsl](16-attributes.nsl) puts them in
-the `page Directory()` block.
+the `page Directory()` block. *Pinned:* `AttributeInstructionTest` assembles
+both at global scope - the unit tier does not run `makensis`, so it records the
+acceptance the corpus has to work around - and
+`UncompilableInstructionTest.DirVar` covers the page form NSIS actually wants.
 
 ### A boolean instruction as a `switch` subject leaves an unused label
 
@@ -177,11 +134,19 @@ elsewhere.
 
 These are excluded for reasons that have nothing to do with the assembler.
 
+Every one of them except the plug-in calls is now covered by a unit test
+instead: the assembler emits the line regardless of whether anything downstream
+can compile it. `AttributeInstructionTest` holds the attributes and
+`UncompilableInstructionTest` the four `makensis` refuses outright, and that is
+the only coverage those have.
+
 | Excluded | Why |
 | --- | --- |
 | `Icon`, `UninstallIcon`, `WindowIcon`, `CheckBitmap`, `AddBrandingImage` | Need real image files, laid out as NSIS expects |
 | `LoadLanguageFile` | Needs an `.nlf` from the NSIS installation |
 | `GetDLLVersionLocal` | Reads the file while compiling, so needs a real DLL. [18-inst-returns.nsl](18-inst-returns.nsl) covers the run-time `GetDLLVersion` |
 | `LogSet`, `LogText` | Rejected outright unless NSIS was built with `NSIS_CONFIG_LOG` |
+| `Int64Fmt` | "Instruction only supported by 64-bit targets!", and `Target("amd64-unicode")` fails too - this build's `Stubs/` holds x86 only. [18-inst-returns.nsl](18-inst-returns.nsl) names it where it would have gone |
 | `ManifestAppendCustomString` | `makensis` 3.12 rejects every two-argument spelling, including one written by hand in a bare `.nsi` |
+| `PEAddResource`, `PERemoveResource` | `makensis` 3.12 rejects every spelling of both, including the one its own usage line prints. `PESubsysVer` and `PEDllCharacteristics` compile on the same build, so this is these two commands rather than the PE family |
 | Plug-in calls | Need actual plug-in DLLs present at compile time |

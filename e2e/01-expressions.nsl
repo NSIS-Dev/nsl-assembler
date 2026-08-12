@@ -20,6 +20,12 @@ section Test("expressions")
   $R4 = 0x1F;
   $R5 = -7;
 
+  // NSIS integers are DWORDs, so the top of the range is a literal too. Both of
+  // these wrap to a negative int, which is the same 32 bits NSIS reads.
+  $R6 = 0xFFFFFFFF;
+  $R7 = 2147483648;
+  DetailPrint("dword ".$R6." ".$R7);
+
   // Registers and NSIS constants as values.
   $R6 = $R0;
   $R7 = $INSTDIR;

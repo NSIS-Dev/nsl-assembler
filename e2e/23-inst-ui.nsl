@@ -28,11 +28,14 @@ function .onGUIInit()
   SendMessage($R0, 0x0030, $R1, 1);
 
   /*
-   * SetCtlColors is not covered: it only implements the assemble-into-a-
-   * register form, so calling it as a statement - which is the only way it can
-   * be called, since it returns nothing - throws UnsupportedOperationException
-   * out of the assembler. See KNOWN-GAPS.md.
+   * SetCtlColors, and its /BRANDING form under its own name the way RMDir /r is
+   * RMDirRecursive. NSIS wants at least a text colour on the plain form, but
+   * accepts the branding one with none at all.
    */
+  SetCtlColors($R0, "0xFF0000");
+  SetCtlColors($R0, "0xFF0000", "transparent");
+  SetCtlColorsBranding($HWNDPARENT);
+  SetCtlColorsBranding($HWNDPARENT, "0x000000", "0xFFFFFF");
 
   BringToFront();
 }
@@ -82,10 +85,13 @@ section Test("ui")
   SetCurInstType(0);
 
   /*
-   * SetBrandingImage has the same defect as SetCtlColors and is not covered
-   * either: it rejects being given a return variable and then throws from the
-   * statement form, so there is no way to call it. See KNOWN-GAPS.md.
+   * SetBrandingImage. The image id has to be given: without one NSIS looks for
+   * an image put there by AddBrandingImage, which needs a real bitmap and so is
+   * outside the corpus. The bitmap itself is only read at run time, which never
+   * happens here.
    */
+  SetBrandingImage($PLUGINSDIR."\\brand.bmp", true, 1234);
+  SetBrandingImage($PLUGINSDIR."\\brand.bmp", false, 1234);
 
   // --- Running things ---
   Exec($SYSDIR."\\notepad.exe");

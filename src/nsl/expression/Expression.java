@@ -307,23 +307,21 @@ public class Expression {
 
 			// Integer types.
 			if (left.type.equals(ExpressionType.Integer) && right.type.equals(ExpressionType.Integer)) {
+				// Widen into locals: the operands may be the objects DefineList holds
+				// for a constant, and unsigned means reinterpreting the 32 bits, which
+				// only a wider type can hold.
+				long leftValue = left.integerValue, rightValue = right.integerValue;
 				if (comparisonType.equals(ComparisonType.IntegerUnsigned)) {
-					left.integerValue = Math.abs(left.integerValue);
-					right.integerValue = Math.abs(right.integerValue);
+					leftValue &= 0xFFFFFFFFL;
+					rightValue &= 0xFFFFFFFFL;
 				}
 
-				if (operator.equals("=="))
-					return Expression.fromBoolean(left.integerValue == right.integerValue);
-				if (operator.equals("!="))
-					return Expression.fromBoolean(left.integerValue != right.integerValue);
-				if (operator.equals(">"))
-					return Expression.fromBoolean(left.integerValue > right.integerValue);
-				if (operator.equals(">="))
-					return Expression.fromBoolean(left.integerValue >= right.integerValue);
-				if (operator.equals("<"))
-					return Expression.fromBoolean(left.integerValue < right.integerValue);
-				if (operator.equals("<="))
-					return Expression.fromBoolean(left.integerValue <= right.integerValue);
+				if (operator.equals("==")) return Expression.fromBoolean(leftValue == rightValue);
+				if (operator.equals("!=")) return Expression.fromBoolean(leftValue != rightValue);
+				if (operator.equals(">")) return Expression.fromBoolean(leftValue > rightValue);
+				if (operator.equals(">=")) return Expression.fromBoolean(leftValue >= rightValue);
+				if (operator.equals("<")) return Expression.fromBoolean(leftValue < rightValue);
+				if (operator.equals("<=")) return Expression.fromBoolean(leftValue <= rightValue);
 			}
 			// Boolean types.
 			else if (left.type.equals(ExpressionType.Boolean)
@@ -391,7 +389,48 @@ public class Expression {
 			comparisonType = ComparisonType.String;
 		}
 
+		// One side is a string literal that cannot be read as a number, and no
+		// comparison type was given. IntCmp would be emitted, and NSIS reads a
+		// non-numeric operand as 0, so the comparison silently means something else
+		// than it says. Compare as strings instead. An explicit "u", "s" or "S"
+		// suffix is always left alone, and a numeric-looking literal such as "42"
+		// keeps comparing numerically.
+		if (comparisonType.equals(ComparisonType.Integer)
+				&& (isNonNumericString(left) || isNonNumericString(right)))
+			comparisonType = ComparisonType.String;
+
 		return new ComparisonExpression(left, operator, right, comparisonType);
+	}
+
+	/**
+	 * Returns <code>true</code> if the given expression is a string literal that NSIS would not read
+	 * as a number.
+	 *
+	 * @param expression the expression
+	 * @return <code>true</code> if the expression is a non-numeric string literal
+	 */
+	private static boolean isNonNumericString(Expression expression) {
+		if (!ExpressionType.isString(expression)) return false;
+
+		// A special string interpolates variables, so its value is not known here.
+		if (expression.type.equals(ExpressionType.StringSpecial)) return true;
+
+		String value = expression.stringValue;
+		if (value == null || value.isEmpty()) return true;
+
+		int i = (value.charAt(0) == '-' || value.charAt(0) == '+') ? 1 : 0;
+		int radix = 10;
+		if (i + 1 < value.length()
+				&& value.charAt(i) == '0'
+				&& (value.charAt(i + 1) == 'x' || value.charAt(i + 1) == 'X')) {
+			radix = 16;
+			i += 2;
+		}
+		if (i == value.length()) return true;
+
+		for (; i < value.length(); i++) if (Character.digit(value.charAt(i), radix) < 0) return true;
+
+		return false;
 	}
 
 	/**
@@ -482,6 +521,22 @@ public class Expression {
 	}
 
 	/**
+	 * Logically negates a Boolean expression.
+	 *
+	 * @param expression the expression to negate
+	 * @return the negated expression
+	 */
+	private static Expression negate(Expression expression) {
+		// A literal may be the object DefineList holds for a constant, so negating
+		// it in place would rewrite the constant for every later use of it. On an
+		// AssembleExpression booleanValue is the negate flag rather than a value,
+		// and there is nothing shared to protect.
+		if (expression.isLiteral()) return Expression.fromBoolean(!expression.booleanValue);
+		expression.booleanValue = !expression.booleanValue;
+		return expression;
+	}
+
+	/**
 	 * Matches a primary expression. This includes matching the Boolean NOT (!) operator and unary
 	 * negate (~) operator.
 	 *
@@ -512,8 +567,7 @@ public class Expression {
 
 					/*if (left instanceof ConditionalExpression)
 						((ConditionalExpression)left).setNegate(true);
-					else */ if (left.booleanValue) left.booleanValue = false;
-					else left.booleanValue = true;
+					else */ left = negate(left);
 				}
 				// Binary negate the returned expression.
 				else if (binaryNegate) {
@@ -544,8 +598,7 @@ public class Expression {
 			if (!left.type.equals(ExpressionType.Boolean))
 				throw new NslException("The \"!\" operator must be applied to a Boolean expression", true);
 
-			if (left.booleanValue) left.booleanValue = false;
-			else left.booleanValue = true;
+			left = negate(left);
 		}
 		// Binary negate the returned value.
 		else if (binaryNegate) {
@@ -795,6 +848,33 @@ public class Expression {
 	}
 
 	/**
+	 * Skips the tokens of an operand that short circuiting has made dead, rather than parsing it: the
+	 * dead side of a && or || is allowed to name constants that do not exist, which is what makes
+	 * <code>defined(X) &amp;&amp; X == 1</code> work.
+	 *
+	 * <p>Parentheses opened inside the operand are counted, so what stops the skip is the token that
+	 * ends the enclosing expression rather than the first one that looks like it.
+	 *
+	 * @param stopChars the operators binding more loosely than the caller's, which therefore are not
+	 *     part of the operand. A closing parenthesis always stops the skip.
+	 */
+	private static void skipDeadOperand(String stopChars) {
+		int depth = 0;
+
+		while (true) {
+			if (ScriptParser.tokenizer.tokenIs('(')) depth++;
+			else if (ScriptParser.tokenizer.tokenIs(')')) {
+				if (depth == 0) break;
+				depth--;
+			} else if (depth == 0
+					&& ScriptParser.tokenizer.tokenIsChar()
+					&& stopChars.indexOf(ScriptParser.tokenizer.ttype) != -1) break;
+
+			if (!ScriptParser.tokenizer.tokenNext("\")\" or \";\"")) break;
+		}
+	}
+
+	/**
 	 * Matches a logical (Boolean) AND (&&) expression or a binary AND (&) expression.
 	 *
 	 * @return the expression
@@ -806,16 +886,9 @@ public class Expression {
 			// Match &&
 			if (ScriptParser.tokenizer.match('&')) {
 				if (ExpressionType.isBoolean(left) && left.booleanValue == false) {
-					// Evaluated to false; we need not evaluate anything up until the next
-					// ||, ) or ;.
-					while (ScriptParser.tokenizer.tokenNext("\")\"")) {
-						if (ScriptParser.tokenizer.tokenIs('('))
-							while (ScriptParser.tokenizer.tokenNext("\")\""))
-								if (ScriptParser.tokenizer.match(')')) break;
-						if (ScriptParser.tokenizer.tokenIs(')')
-								|| ScriptParser.tokenizer.tokenIs('|')
-								|| ScriptParser.tokenizer.tokenIs(';')) break;
-					}
+					// Evaluated to false; we need not evaluate the right operand. ^, | and the
+					// ternary ? all bind more loosely than &&, so they end it.
+					skipDeadOperand("^|?,;");
 				} else {
 					left = createBoolean(left, "&&", matchEqualityOrAssignment());
 				}
@@ -879,9 +952,9 @@ public class Expression {
 			// Match ||
 			if (ScriptParser.tokenizer.match('|')) {
 				if (ExpressionType.isBoolean(left) && left.booleanValue == true) {
-					// Evaluated to true; we can ignore the rest of the expression.
-					while (ScriptParser.tokenizer.tokenNext("\")\" or \";\""))
-						if (ScriptParser.tokenizer.tokenIs(')') || ScriptParser.tokenizer.tokenIs(';')) break;
+					// Evaluated to true; we need not evaluate the right operand. ^ binds more
+					// tightly than || and so is part of it; a binary | is not.
+					skipDeadOperand("|?,;");
 				} else {
 					left = createBoolean(left, "||", matchBinaryExclusiveOr());
 				}
@@ -985,14 +1058,16 @@ public class Expression {
 					throw new NslArgumentException("toint", 2, ExpressionType.Integer);
 			} else defaultValue = null;
 
-			// String literals are parsed as plain integers or as hexadecimal (0x...).
+			// String literals are parsed as plain integers or as hexadecimal (0x...) -
+			// the same spellings a number written directly into the source has.
 			if (value.type.equals(ExpressionType.String)
 					|| value.type.equals(ExpressionType.StringSpecial)) {
 				String stringValue = value.toString(true);
 				try {
-					if (stringValue.startsWith("0x"))
-						return Expression.fromInteger(Integer.parseInt(stringValue, 16));
-					return Expression.fromInteger(Integer.parseInt(stringValue));
+					long longValue = Tokenizer.parseNumber(stringValue);
+					if (longValue > 0xFFFFFFFFL || longValue < Integer.MIN_VALUE)
+						throw new NumberFormatException("It does not fit in 32 bits");
+					return Expression.fromInteger((int) longValue);
 				} catch (Exception ex) {
 					if (defaultValue == null)
 						NslException.printWarning(

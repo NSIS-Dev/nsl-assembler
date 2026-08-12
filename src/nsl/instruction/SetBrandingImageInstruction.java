@@ -56,7 +56,25 @@ public class SetBrandingImageInstruction extends AssembleExpression {
 	/** Assembles the source code. */
 	@Override
 	public void assemble() throws IOException {
-		throw new UnsupportedOperationException("Not supported.");
+		Expression varOrFile = AssembleExpression.getRegisterOrExpression(this.file);
+
+		String write = name + " ";
+
+		// NSIS only accepts the switches ahead of the bitmap.
+		if (this.imgId != null) {
+			AssembleExpression.assembleIfRequired(this.imgId);
+			write += "/IMGID=" + this.imgId + " ";
+		}
+
+		if (this.resizeToFit != null) {
+			AssembleExpression.assembleIfRequired(this.resizeToFit);
+			if (this.resizeToFit.getBooleanValue() == true) write += "/RESIZETOFIT ";
+		}
+
+		write += varOrFile;
+
+		ScriptParser.writeLine(write);
+		varOrFile.setInUse(false);
 	}
 
 	/**
@@ -66,21 +84,6 @@ public class SetBrandingImageInstruction extends AssembleExpression {
 	 */
 	@Override
 	public void assemble(Register var) throws IOException {
-		Expression varOrFile = AssembleExpression.getRegisterOrExpression(this.file);
-		String write = name + " " + var + " " + varOrFile;
-
-		if (this.resizeToFit != null) {
-			AssembleExpression.assembleIfRequired(this.resizeToFit);
-
-			if (this.imgId != null) {
-				AssembleExpression.assembleIfRequired(this.imgId);
-				if (this.imgId.getBooleanValue() == true) write += " /IMGID=" + this.imgId;
-			}
-
-			if (this.resizeToFit.getBooleanValue() == true) write += " /RESIZETOFIT";
-		}
-
-		ScriptParser.writeLine(write);
-		varOrFile.setInUse(false);
+		throw new UnsupportedOperationException("Not supported.");
 	}
 }

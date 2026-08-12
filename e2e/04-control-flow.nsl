@@ -148,6 +148,27 @@ section Test("control flow")
     }
   }
 
+  // A break or continue *after* a nested loop: the inner loop's constructor has
+  // to restore the outer loop's labels rather than clear them.
+  $i = 0;
+  while ($i < 3)
+  {
+    for ($j = 0; $j < 2; $j++)
+      DetailPrint("after nested: ".$i." ".$j);
+    $i++;
+    if ($i == 1)
+      continue;
+    break;
+  }
+
+  do
+  {
+    $j = 0;
+    while ($j < 2) { $j++; }
+    continue;
+  }
+  while (false);
+
   // A loop inside an if inside a loop.
   for ($i = 0; $i < 2; $i++)
   {
