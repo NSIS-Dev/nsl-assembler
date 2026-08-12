@@ -104,13 +104,27 @@ section Test("switch")
   }
 
   /*
-   * Deliberately absent: any loop or nested switch inside a case. The first one
-   * that appears leaves every later break in the enclosing switch rejected with
-   * "The break statement cannot be used here", while the assembler separately
-   * insists the switch end with a break - so no arrangement of the two
-   * assembles. Put the inner construct in a function and call it instead.
-   * See KNOWN-GAPS.md.
+   * A loop and a nested switch inside a case. Both bring their own break label,
+   * so the point is the break that follows them: it has to reach the enclosing
+   * switch, not the construct that has already ended.
    */
+  switch ($R0)
+  {
+    case 1:
+      for ($i = 0; $i < 2; $i++)
+        DetailPrint("nested loop in case: ".$i);
+      break;
+    default:
+      switch ($R0 + 1)
+      {
+        case 2:
+          DetailPrint("nested switch in case");
+          break;
+        default:
+          break;
+      }
+      break;
+  }
 
   // Several statements per case, and an empty case body.
   $R2 = 3;

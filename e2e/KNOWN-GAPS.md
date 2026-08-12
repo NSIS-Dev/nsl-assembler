@@ -9,6 +9,11 @@ are deliberate and reviewable rather than silent, and so that a fix has a test
 waiting for it: removing the workaround in the named file is the regression
 test.
 
+Several are now also pinned in [test/](../test), which assembles in a
+subprocess and never runs `makensis`, so it can cover things the corpus cannot
+reach. Where a gap has a unit test standing on it, the entry names it: fixing
+the gap turns that test red, which is the reminder to come back here.
+
 ---
 
 ## Assembler crashes
@@ -38,7 +43,8 @@ Both reject being given a return variable and then throw
 `UnsupportedOperationException` from the statement form, so there is no way to
 write either of them.
 
-*Corpus:* not used; [23-inst-ui.nsl](23-inst-ui.nsl) says why.
+*Corpus:* not used; [23-inst-ui.nsl](23-inst-ui.nsl) says why. *Pinned:*
+`UiInstructionTest.testUncallableInstructions` asserts both are rejected.
 
 ---
 
@@ -72,27 +78,6 @@ to run in global context - so every spelling of the keyword fails:
 There is no way to write a section group. *Corpus:*
 [07-sections.nsl](07-sections.nsl) covers sections only.
 
-### A loop or a nested switch inside a `switch`
-
-The first breakable construct inside a case leaves every later `break` in the
-enclosing switch rejected:
-
-```nsl
-switch ($R0)
-{
-  case 1:
-    $i = 0;
-    while ($i < 2) { $i++; }
-  default:
-    DetailPrint("d");
-    break;              // The "break" statement cannot be used here.
-}
-```
-
-The assembler separately insists a switch end with a `break`, so no arrangement
-of the two assembles. *Corpus:* [05-switch.nsl](05-switch.nsl) keeps case bodies
-flat and says so.
-
 ---
 
 ## Smaller things
@@ -111,6 +96,8 @@ assembler function instead". Its argument has to be a nested instruction call:
 ```nsl
 $R3 = StrLen(ReadEnvStr("PATH"));
 ```
+
+*Pinned:* `ReturningInstructionTest.StrLen` asserts the temporary.
 
 ### `toint()` cannot parse hexadecimal
 
@@ -138,7 +125,10 @@ equivalent and folds the same way.
 
 Both list `NslContext.Global` as valid, but NSIS rejects them anywhere except
 inside a `PageEx`. *Corpus:* [16-attributes.nsl](16-attributes.nsl) puts them in
-the `page Directory()` block.
+the `page Directory()` block. *Pinned:* `AttributeInstructionTest` assembles
+both at global scope - the unit tier does not run `makensis`, so it records the
+acceptance the corpus has to work around - and
+`UncompilableInstructionTest.DirVar` covers the page form NSIS actually wants.
 
 ### A boolean instruction as a `switch` subject leaves an unused label
 
@@ -159,6 +149,12 @@ elsewhere.
 ## Not gaps: environment limits
 
 These are excluded for reasons that have nothing to do with the assembler.
+
+Every one of them except the plug-in calls is now covered by a unit test
+instead: the assembler emits the line regardless of whether anything downstream
+can compile it. `AttributeInstructionTest` holds the attributes and
+`UncompilableInstructionTest` the four `makensis` refuses outright, and that is
+the only coverage those have.
 
 | Excluded | Why |
 | --- | --- |
