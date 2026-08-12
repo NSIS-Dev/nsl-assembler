@@ -49,7 +49,10 @@ public class UiInstructionTest {
 								"  $R5 = ExecWait($INSTDIR.\"\\\\a.exe\");",
 								"  ExecWait($INSTDIR.\"\\\\a.exe\");",
 								"  MessageBox(\"MB_OK\", \"m\");",
-								"  $R6 = MessageBox(\"MB_YESNO\", \"m\");"));
+								"  $R6 = MessageBox(\"MB_YESNO\", \"m\");",
+								"  SetBrandingImage($PLUGINSDIR.\"\\\\b.bmp\", true, 1234);",
+								"  SetBrandingImage($PLUGINSDIR.\"\\\\b.bmp\", false, 1234);",
+								"  SetBrandingImage($PLUGINSDIR.\"\\\\b.bmp\");"));
 	}
 
 	@Test
@@ -148,18 +151,26 @@ public class UiInstructionTest {
 						"MessageBox MB_YESNO \"m\" IDNO +3", "StrCpy $R6 IDYES", "Goto +2", "StrCpy $R6 IDNO"));
 	}
 
+	/** NSIS only accepts the switches ahead of the bitmap, and the image id independently of them. */
+	@Test
+	public void SetBrandingImage() {
+		assertThat(
+				nsi, containsLine("SetBrandingImage /IMGID=1234 /RESIZETOFIT \"$PLUGINSDIR\\b.bmp\""));
+		assertThat(nsi, containsLine("SetBrandingImage /IMGID=1234 \"$PLUGINSDIR\\b.bmp\""));
+		assertThat(nsi, containsLine("SetBrandingImage \"$PLUGINSDIR\\b.bmp\""));
+	}
+
 	/**
-	 * SetCtlColors and SetBrandingImage return nothing, so a statement is the only way to call them -
-	 * but both implement only {@code assemble(Register)} and throw UnsupportedOperationException from
-	 * the statement form. They are therefore unreachable from nsL entirely.
+	 * SetCtlColors returns nothing, so a statement is the only way to call it - but it implements
+	 * only {@code assemble(Register)} and throws UnsupportedOperationException from the statement
+	 * form. It is therefore unreachable from nsL entirely.
 	 *
 	 * <p>Known bug, unfixed; see e2e/KNOWN-GAPS.md. Pinned as uncallable so that implementing {@code
-	 * assemble()} on either turns this red.
+	 * assemble()} turns this red.
 	 */
 	@Test
 	public void testUncallableInstructions() throws Exception {
 		Assembler.assembleExpectingError(
 				inSection("  SetCtlColors($HWNDPARENT, \"FFFFFF\", \"000000\");"));
-		Assembler.assembleExpectingError(inSection("  SetBrandingImage(\"b.bmp\");"));
 	}
 }

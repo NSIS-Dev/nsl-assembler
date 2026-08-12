@@ -82,10 +82,13 @@ section Test("ui")
   SetCurInstType(0);
 
   /*
-   * SetBrandingImage has the same defect as SetCtlColors and is not covered
-   * either: it rejects being given a return variable and then throws from the
-   * statement form, so there is no way to call it. See KNOWN-GAPS.md.
+   * SetBrandingImage. The image id has to be given: without one NSIS looks for
+   * an image put there by AddBrandingImage, which needs a real bitmap and so is
+   * outside the corpus. The bitmap itself is only read at run time, which never
+   * happens here.
    */
+  SetBrandingImage($PLUGINSDIR."\\brand.bmp", true, 1234);
+  SetBrandingImage($PLUGINSDIR."\\brand.bmp", false, 1234);
 
   // --- Running things ---
   Exec($SYSDIR."\\notepad.exe");
