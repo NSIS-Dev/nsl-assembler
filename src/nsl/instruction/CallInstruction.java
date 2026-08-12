@@ -38,7 +38,7 @@ public class CallInstruction extends AssembleExpression {
 
 		this.target = paramsList.get(0);
 		if (!ExpressionType.isString(this.target) && !ExpressionType.isRegister(this.target))
-			throw new NslArgumentException(name, 1, ExpressionType.String);
+			throw new NslArgumentException(name, 1, ExpressionType.String, ExpressionType.Register);
 
 		this.lineNo = ScriptParser.tokenizer.lineno();
 		// Recorded here rather than read in assemble(): the flag tracks where the

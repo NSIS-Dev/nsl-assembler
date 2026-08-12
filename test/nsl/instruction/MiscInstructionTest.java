@@ -7,6 +7,7 @@ package nsl.instruction;
 import static nsl.Assembler.*;
 import static org.junit.Assert.*;
 
+import nsl.Assembler;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -208,6 +209,13 @@ public class MiscInstructionTest {
 	@Test
 	public void Call() {
 		assertThat(nsi, containsLines("Call Helper", "Call Helper"));
+	}
+
+	/** A register holding an address is the other accepted form, so the rejection names both. */
+	@Test
+	public void CallRejectsAnythingElse() throws Exception {
+		Assembler.Result result = Assembler.assembleExpectingError(inSection("  Call(5);"));
+		assertTrue(result.output, result.output.contains("a string or a register/variable"));
 	}
 
 	/** The address family's arguments are likewise unquoted despite being written as strings. */
