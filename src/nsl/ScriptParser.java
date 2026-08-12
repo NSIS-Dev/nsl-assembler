@@ -215,9 +215,12 @@ public class ScriptParser {
 	 * @param scriptPath the script file path
 	 * @return the output file path
 	 */
-	private static String getOutputPath(String scriptPath) {
+	static String getOutputPath(String scriptPath) {
+		// The extension can only be in the file name, so a dot belonging to a directory
+		// ("../my.dir/script") must not be taken for one.
+		int separator = Math.max(scriptPath.lastIndexOf('/'), scriptPath.lastIndexOf('\\'));
 		int i = scriptPath.lastIndexOf('.');
-		if (i == -1) return scriptPath + ".nsi";
+		if (i <= separator) return scriptPath + ".nsi";
 		return scriptPath.substring(0, i) + ".nsi";
 	}
 }
