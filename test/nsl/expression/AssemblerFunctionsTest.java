@@ -67,15 +67,23 @@ public class AssemblerFunctionsTest {
 	}
 
 	/**
-	 * ISSUES.md #3: toint documents hexadecimal but hands "0xFF" to Integer.parseInt with radix 16,
-	 * which does not strip the prefix. Pinned as it stands - a fix turns these into 255 and 7.
+	 * toint reads a string with the same spellings a number written into the source has, both going
+	 * through {@link nsl.Tokenizer#parseNumber}.
 	 */
 	@Test
-	public void tointCannotDoHex() {
-		assertEquals("0", evaluate("toint('0xFF')"));
-		assertEquals("7", evaluate("toint('0xFF', 7)"));
+	public void tointHex() {
+		assertEquals("255", evaluate("toint('0xFF')"));
+		assertEquals("255", evaluate("toint('0xff')"));
+		assertEquals("-16", evaluate("toint('-0x10')"));
 
-		// Without the prefix it converts, but as decimal, so this is not a workaround.
+		// NSIS integers are DWORDs, so the top half of the range wraps negative -
+		// the same value the literal 0xFFFFFFFF carries.
+		assertEquals("-1", evaluate("toint('0xFFFFFFFF')"));
+		assertEquals("7", evaluate("toint('0x1FFFFFFFF', 7)"));
+
+		// A bare "FF" is not hexadecimal: reading it as such would leave "11"
+		// ambiguous. The prefix is what selects the radix.
+		assertEquals("7", evaluate("toint('FF', 7)"));
 		assertEquals("11", evaluate("toint('11')"));
 	}
 

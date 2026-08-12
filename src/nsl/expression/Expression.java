@@ -1038,14 +1038,16 @@ public class Expression {
 					throw new NslArgumentException("toint", 2, ExpressionType.Integer);
 			} else defaultValue = null;
 
-			// String literals are parsed as plain integers or as hexadecimal (0x...).
+			// String literals are parsed as plain integers or as hexadecimal (0x...) -
+			// the same spellings a number written directly into the source has.
 			if (value.type.equals(ExpressionType.String)
 					|| value.type.equals(ExpressionType.StringSpecial)) {
 				String stringValue = value.toString(true);
 				try {
-					if (stringValue.startsWith("0x"))
-						return Expression.fromInteger(Integer.parseInt(stringValue, 16));
-					return Expression.fromInteger(Integer.parseInt(stringValue));
+					long longValue = Tokenizer.parseNumber(stringValue);
+					if (longValue > 0xFFFFFFFFL || longValue < Integer.MIN_VALUE)
+						throw new NumberFormatException("It does not fit in 32 bits");
+					return Expression.fromInteger((int) longValue);
 				} catch (Exception ex) {
 					if (defaultValue == null)
 						NslException.printWarning(

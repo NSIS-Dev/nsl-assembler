@@ -197,6 +197,28 @@ public class Tokenizer extends StreamTokenizer {
 	}
 
 	/**
+	 * Parses a number the way nsL spells one: decimal, or hexadecimal behind an "0x" prefix, either
+	 * of them optionally signed. Returned wide so that the caller can range check with its own
+	 * diagnostic - NSIS integers are DWORDs, so anything from 0x80000000 up is a valid literal that
+	 * wraps to a negative int, which Integer.parseInt would reject.
+	 *
+	 * @param text the text to parse
+	 * @return the parsed value, not yet narrowed to 32 bits
+	 * @throws NumberFormatException if the text is not a number
+	 */
+	public static long parseNumber(String text) {
+		String digits = text;
+		String sign = "";
+		if (digits.startsWith("-") || digits.startsWith("+")) {
+			sign = digits.substring(0, 1);
+			digits = digits.substring(1);
+		}
+		if (digits.length() > 2 && digits.startsWith("0x"))
+			return Long.parseLong(sign + digits.substring(2), 16);
+		return Long.parseLong(text);
+	}
+
+	/**
 	 * Gets the next token.
 	 *
 	 * @return <code>true</code> if there was another token
@@ -226,16 +248,9 @@ public class Tokenizer extends StreamTokenizer {
 				if (c >= '0' && c <= '9') {
 					this.ttype = TT_NUMBER;
 
-					// NSIS integers are DWORDs, so anything from 0x80000000 up is a
-					// valid literal that wraps to a negative int. Parse wide and
-					// narrow, rather than letting Integer.parseInt reject it.
 					long value;
 					try {
-						if (this.sval.length() > 1 && this.sval.startsWith("0x")) {
-							value = Long.parseLong(this.sval.substring(2), 16);
-						} else {
-							value = Long.parseLong(this.sval);
-						}
+						value = parseNumber(this.sval);
 					} catch (NumberFormatException ex) {
 						throw new NslException("Invalid number \"" + this.sval + "\"", true);
 					}
