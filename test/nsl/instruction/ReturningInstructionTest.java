@@ -73,19 +73,13 @@ public class ReturningInstructionTest {
 	}
 
 	/**
-	 * The no-argument form is right. The one-argument form is not.
-	 *
-	 * <p>Known bug, unfixed: GetTempFileNameInstruction guards the assignment of the base directory
-	 * with {@code paramsCount > 1} rather than {@code > 0}, so it is never assigned and the operand
-	 * is silently dropped. NSIS then defaults to $TEMP, which is why nothing downstream notices - the
-	 * script still compiles and, whenever the argument happens to be $TEMP, still behaves. Pinned as
-	 * it stands; when the guard is fixed this assertion goes red, which is the prompt to update it to
-	 * {@code GetTempFileName $R3 $TEMP}.
+	 * The base directory is optional, and omitting it must not emit a stray operand. It used to be
+	 * dropped even when given, which NSIS hid by defaulting to $TEMP.
 	 */
 	@Test
 	public void GetTempFileName() {
 		assertThat(nsi, containsLine("GetTempFileName $R2"));
-		assertThat(nsi, containsLine("GetTempFileName $R3"));
+		assertThat(nsi, containsLine("GetTempFileName $R3 $TEMP"));
 	}
 
 	@Test

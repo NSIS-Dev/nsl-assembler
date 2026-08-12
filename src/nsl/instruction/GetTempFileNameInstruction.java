@@ -32,7 +32,7 @@ public class GetTempFileNameInstruction extends AssembleExpression {
 		int paramsCount = paramsList.size();
 		if (paramsCount > 1) throw new NslArgumentException(name, 0, 1);
 
-		if (paramsCount > 1) this.baseDir = paramsList.get(0);
+		if (paramsCount > 0) this.baseDir = paramsList.get(0);
 		else this.baseDir = null;
 	}
 
