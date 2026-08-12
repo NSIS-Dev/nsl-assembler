@@ -194,3 +194,33 @@ RMDirRecursive("directory");
 
 RMDirRecursive("directory", true);
   RMDir /r /REBOOTOK "directory"
+
+------------------------------------------------------------------------
+
+SetBrandingImage("bitmap.bmp");
+  SetBrandingImage "bitmap.bmp"
+
+SetBrandingImage("bitmap.bmp", true);
+  SetBrandingImage /RESIZETOFIT "bitmap.bmp"
+
+SetBrandingImage("bitmap.bmp", true, 1234);
+  SetBrandingImage /IMGID=1234 /RESIZETOFIT "bitmap.bmp"
+
+------------------------------------------------------------------------
+
+SetCtlColors(hWnd, "textColor");
+  SetCtlColors hWnd textColor
+
+SetCtlColors(hWnd, "textColor", "bgColor");
+  SetCtlColors hWnd textColor bgColor
+
+------------------------------------------------------------------------
+
+SetCtlColorsBranding(hWnd);
+  SetCtlColors hWnd /BRANDING
+
+SetCtlColorsBranding(hWnd, "textColor");
+  SetCtlColors hWnd /BRANDING textColor
+
+SetCtlColorsBranding(hWnd, "textColor", "bgColor");
+  SetCtlColors hWnd /BRANDING textColor bgColor
