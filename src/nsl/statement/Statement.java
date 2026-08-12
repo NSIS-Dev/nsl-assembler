@@ -369,6 +369,8 @@ public abstract class Statement {
 			return new SetCompressorInstruction(returns);
 		if (ScriptParser.tokenizer.match(SetCtlColorsInstruction.name))
 			return new SetCtlColorsInstruction(returns);
+		if (ScriptParser.tokenizer.match(SetCtlColorsBrandingInstruction.name))
+			return new SetCtlColorsBrandingInstruction(returns);
 		if (ScriptParser.tokenizer.match(SetCurInstTypeInstruction.name))
 			return new SetCurInstTypeInstruction(returns);
 		if (ScriptParser.tokenizer.match(SetDatablockOptimizeInstruction.name))

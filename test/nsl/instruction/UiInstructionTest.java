@@ -52,7 +52,11 @@ public class UiInstructionTest {
 								"  $R6 = MessageBox(\"MB_YESNO\", \"m\");",
 								"  SetBrandingImage($PLUGINSDIR.\"\\\\b.bmp\", true, 1234);",
 								"  SetBrandingImage($PLUGINSDIR.\"\\\\b.bmp\", false, 1234);",
-								"  SetBrandingImage($PLUGINSDIR.\"\\\\b.bmp\");"));
+								"  SetBrandingImage($PLUGINSDIR.\"\\\\b.bmp\");",
+								"  SetCtlColors($R1, \"0xFF0000\");",
+								"  SetCtlColors($R1, \"0xFF0000\", \"transparent\");",
+								"  SetCtlColorsBranding($R1);",
+								"  SetCtlColorsBranding($R1, \"0xFF0000\", \"transparent\");"));
 	}
 
 	@Test
@@ -160,17 +164,18 @@ public class UiInstructionTest {
 		assertThat(nsi, containsLine("SetBrandingImage \"$PLUGINSDIR\\b.bmp\""));
 	}
 
-	/**
-	 * SetCtlColors returns nothing, so a statement is the only way to call it - but it implements
-	 * only {@code assemble(Register)} and throws UnsupportedOperationException from the statement
-	 * form. It is therefore unreachable from nsL entirely.
-	 *
-	 * <p>Known bug, unfixed; see e2e/KNOWN-GAPS.md. Pinned as uncallable so that implementing {@code
-	 * assemble()} turns this red.
-	 */
+	/** The background colour is optional; NSIS refuses the handle on its own. */
 	@Test
-	public void testUncallableInstructions() throws Exception {
-		Assembler.assembleExpectingError(
-				inSection("  SetCtlColors($HWNDPARENT, \"FFFFFF\", \"000000\");"));
+	public void SetCtlColors() throws Exception {
+		assertThat(nsi, containsLine("SetCtlColors $R1 \"0xFF0000\""));
+		assertThat(nsi, containsLine("SetCtlColors $R1 \"0xFF0000\" \"transparent\""));
+		Assembler.assembleExpectingError(inSection("  SetCtlColors($HWNDPARENT);"));
+	}
+
+	/** nsL-only name for SetCtlColors /BRANDING, which unlike the plain form needs no colour. */
+	@Test
+	public void SetCtlColorsBranding() {
+		assertThat(nsi, containsLine("SetCtlColors $R1 /BRANDING"));
+		assertThat(nsi, containsLine("SetCtlColors $R1 /BRANDING \"0xFF0000\" \"transparent\""));
 	}
 }

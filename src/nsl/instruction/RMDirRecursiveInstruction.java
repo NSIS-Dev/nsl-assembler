@@ -11,6 +11,10 @@ import nsl.*;
 import nsl.expression.*;
 
 /**
+ * Not an NSIS command: nsL gives the {@code /r} switch on {@code RMDir} a name of its own, and this
+ * writes {@code RMDir /r}. Compare {@link SetCtlColorsBrandingInstruction}, which does the same for
+ * {@code /BRANDING}.
+ *
  * @author Stuart
  */
 public class RMDirRecursiveInstruction extends AssembleExpression {

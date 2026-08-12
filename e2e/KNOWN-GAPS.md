@@ -37,16 +37,6 @@ parameters and returns a value cannot be called for its side effects alone.
 *Corpus:* [06-functions.nsl](06-functions.nsl) assigns the result even where
 nothing needs it.
 
-### `SetCtlColors` cannot be called
-
-It rejects being given a return variable and then throws
-`UnsupportedOperationException` from the statement form, so there is no way to
-write it. `SetBrandingImage` had the same defect and is now fixed - it is
-covered in [23-inst-ui.nsl](23-inst-ui.nsl).
-
-*Corpus:* not used; [23-inst-ui.nsl](23-inst-ui.nsl) says why. *Pinned:*
-`UiInstructionTest.testUncallableInstructions` asserts it is rejected.
-
 ---
 
 ## Wrong code emitted
