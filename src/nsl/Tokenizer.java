@@ -197,10 +197,10 @@ public class Tokenizer extends StreamTokenizer {
 	}
 
 	/**
-	 * Parses a number the way nsL spells one: decimal, or hexadecimal behind an "0x" prefix, either
-	 * of them optionally signed. Returned wide so that the caller can range check with its own
-	 * diagnostic - NSIS integers are DWORDs, so anything from 0x80000000 up is a valid literal that
-	 * wraps to a negative int, which Integer.parseInt would reject.
+	 * Parses a number the way nsL spells one: decimal, or hexadecimal behind an "0x" prefix in either
+	 * case, as makensis takes it, either of them optionally signed. Returned wide so that the caller
+	 * can range check with its own diagnostic - NSIS integers are DWORDs, so anything from 0x80000000
+	 * up is a valid literal that wraps to a negative int, which Integer.parseInt would reject.
 	 *
 	 * @param text the text to parse
 	 * @return the parsed value, not yet narrowed to 32 bits
@@ -213,7 +213,7 @@ public class Tokenizer extends StreamTokenizer {
 			sign = digits.substring(0, 1);
 			digits = digits.substring(1);
 		}
-		if (digits.length() > 2 && digits.startsWith("0x"))
+		if (digits.length() > 2 && digits.regionMatches(true, 0, "0x", 0, 2))
 			return Long.parseLong(sign + digits.substring(2), 16);
 		return Long.parseLong(text);
 	}

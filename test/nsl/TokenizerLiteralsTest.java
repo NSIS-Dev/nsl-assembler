@@ -112,6 +112,21 @@ public class TokenizerLiteralsTest {
 		}
 	}
 
+	/** The hexadecimal prefix is matched in either case, the way makensis reads one. */
+	@Test
+	public void hexLiteralsAcceptEitherPrefixCase() {
+		assertEquals(255, Tokenizer.parseNumber("0xFF"));
+		assertEquals(255, Tokenizer.parseNumber("0XFF"));
+		assertEquals(255, Tokenizer.parseNumber("0xff"));
+		assertEquals(255, Tokenizer.parseNumber("0Xff"));
+
+		Tokenizer tokenizer = tokenizerOver("0XFF 0xFF");
+		assertTrue(tokenizer.tokenIsNumber());
+		assertEquals(255, tokenizer.nval, 0);
+		tokenizer.tokenNext();
+		assertEquals(255, tokenizer.nval, 0);
+	}
+
 	/** Both comment styles are skipped. */
 	@Test
 	public void commentsAreSkipped() {
